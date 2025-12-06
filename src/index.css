@@ -1,1 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap');
+
 @import "tailwindcss";
+
+/* ---------------- Light Theme ---------------- */
+@plugin "daisyui" {
+  themes: light --default, dark;
+}
+
+@plugin "daisyui/theme" {
+  name: "light";
+  default: true;
+  --color-primary: #FF7B6B;
+  --color-secondary: #2F3D7E;
+  --color-base-200: #ffefee;
+  --color-secondary-content: #646262;
+  --color-secondary-focus: #333333;
+  --color-base-300: #EAE6E0;
+
+  --color-accent: #666666;
+}
+
+/* ---------------- Dark Theme ---------------- */
+/* @plugin "daisyui/theme" {
+  name: "dark";
+   --color-primary: #ED7D3A;
+  --color-secondary: #2F3D7E;
+  --color-secondary-content: #646262;
+  --color-secondary-focus: #333333;
+  --color-base-200: #000000;
+  --color-base-300: #EAE6E0;
+  --color-accent: #666666;
+} */
+
+/* @import "@smastrom/react-rating/style.css"; */
+
+* {
+  font-family: "Sora", sans-serif;
+}
+
+.active {
+  color: var(--color-primary);
+  font-weight: 700;
+}
