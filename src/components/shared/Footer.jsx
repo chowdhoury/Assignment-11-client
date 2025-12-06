@@ -12,7 +12,7 @@ import Logo from "./Logo";
 const Footer = () => {
   return (
     <div className="bg-primary relative mt-40">
-      <div className="flex flex-col lg:flex-row gap-5 lg:gap-0 bg-base-200 w-[95%] lg:w-9/12 lg:mx-auto px-10 py-8 rounded-2xl items-center absolute left-1/2  -translate-x-1/2 -translate-y-1/2 z-20">
+      <div className="flex flex-col lg:flex-row gap-5 lg:gap-0 bg-base-200 w-[95%] lg:w-8/12 lg:mx-auto px-10 py-8 rounded-2xl items-center absolute left-1/2  -translate-x-1/2 -translate-y-1/2 z-20">
         <div className="flex-1">
           <h1 className="font-black text-secondary text-3xl text-center md:text-start mb-5 md:mb-0 md:text-[40px] ">
             Subscribe Our Newsletter

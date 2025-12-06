@@ -23,7 +23,7 @@ const Navbar = () => {
       </>
     );
     return (
-      <div className=" bg-base-100 flex justify-center py-5 border ">
+      <div className=" bg-base-100 flex justify-center py-5 ">
         <div className="navbar lg:w-4/5 w-full">
           <div className="navbar-start">
             <div className="dropdown">
