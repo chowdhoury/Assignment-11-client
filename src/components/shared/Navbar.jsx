@@ -55,7 +55,7 @@ const Navbar = () => {
                 {navLinks}
               </ul>
             </div>
-            <Logo/>
+            <Logo textSize="text-3xl" />
           </div>
           <div className="navbar-center hidden lg:flex">
             <ul className="flex gap-5 px-1 text-[18px] font-semibold text-secondary">

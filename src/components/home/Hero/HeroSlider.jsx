@@ -22,7 +22,7 @@ const HeroSlider = () => {
         <div className="max-w-3xl px-4">
           <div className="flex justify-center gap-4">
             <figure className="bg-base-200/50 p-2 rounded-full">
-              <Logo />
+              <Logo textSize="text-3xl" />
             </figure>
           </div>
           <h1 className="font-extrabold lg:text-[70px] md:text-[50px] text-[30px] leading-tight">

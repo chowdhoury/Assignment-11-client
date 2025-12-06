@@ -37,7 +37,7 @@ const Footer = () => {
       <div className="flex w-[95%] flex-col md:flex-row lg:w-4/5 mx-auto justify-between pt-40 md:pt-30 pb-16 gap-15 text-white text-center md:text-left">
         <div className="flex-1 flex flex-col gap-5">
           <figure className="justify-items-center md:justify-items-start">
-            <Logo />
+            <Logo textSize="text-3xl" />
           </figure>
           <p>
             Boimela brings elegance to every page, offering smart and intuitive
