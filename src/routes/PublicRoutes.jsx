@@ -3,6 +3,7 @@ import MainLayout from "../layouts/MainLayout";
 import SignUp from "../page/sign up/SignUp";
 import SignIn from "../page/sign in/SignIn";
 import Home from "../page/home/Home";
+import ResetPassword from "../page/reset-password/ResetPassword";
 
 export const router = createBrowserRouter([
   {
@@ -21,6 +22,10 @@ export const router = createBrowserRouter([
         path: "/signin",
         element: <SignIn />,
       },
+      {
+        path: "/password-reset",
+        element: <ResetPassword/>,
+      }
     ],
   },
 
