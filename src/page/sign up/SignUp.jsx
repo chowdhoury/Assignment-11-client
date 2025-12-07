@@ -48,11 +48,11 @@ const SignUp = () => {
         await createUserInDB({
         user: { name: loggedUser.displayName, email: loggedUser.email, photoURL: loggedUser.photoURL },
       });
-        console.log(loggedUser);
+        toast.success("Sign In Successful");
         navigate(from, { replace: true });
       })
       .catch((err) => {
-        console.log(err.message);
+        toast.error(err.message);
       });
   };
   return (

@@ -1,33 +1,54 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import useAuth from "../../hooks/useAuth";
 import { useForm } from "react-hook-form";
 import Logo from "../../components/shared/Logo";
 import { IoIosEye, IoIosEyeOff } from "react-icons/io";
 import { FcGoogle } from "react-icons/fc";
 import { SiGnuprivacyguard } from "react-icons/si";
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
+import { createUserInDB } from "../../utils/GoogleSignIn";
+import toast from "react-hot-toast";
 
 const SignIn = () => {
+  const { signInWithGoogle, user, signIn } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm();
-  const { signIn } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state || "/";
+  if(user){
+    navigate(from, { replace: true });
+  }
 
   const onSubmit = (data) => {
     const { email, password } = data;
     signIn(email, password)
       .then((result) => {
-        const loggedUser = result.user;
-        console.log(loggedUser);
+        toast.success("Sign In Successful");
+        navigate(from, { replace: true });
       })
       .catch((err) => {
-        console.log(err.message);
+        toast.error(err.message);
       });
   };
+  const handleGoogleSignIn = () => {
+      signInWithGoogle()
+        .then(async (result) => {
+          const loggedUser = result.user;
+          await createUserInDB({
+          user: { name: loggedUser.displayName, email: loggedUser.email, photoURL: loggedUser.photoURL },
+        });
+          toast.success("Sign In Successful");
+          navigate(from, { replace: true });
+        })
+        .catch((err) => {
+          toast.error(err.message);
+        });
+    };
 
   return (
     <div className="min-h-screen w-full bg-primary flex justify-center items-center -mb-40">
@@ -48,18 +69,39 @@ const SignIn = () => {
               type="email"
               className="input w-full text-primary"
               placeholder="Email"
-              name="email"
-              required
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                  message: "Invalid email address",
+                },
+              })}
             />
+            {errors.email && (
+              <p className="text-red-600">{errors.email.message}</p>
+            )}
             <label className="label text-secondary">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
                 className="input w-full  text-primary z-20"
                 placeholder="Password"
-                name="password"
-                required
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters",
+                  },
+                  pattern: {
+                    value: /(?=.*[A-Z])(?=.*[!@#$&*])(?=.*[0-9])/,
+                    message:
+                      "Include 1 uppercase letter, 1 number, and 1 special character",
+                  },
+                })}
               />
+              {errors.password && (
+                <p className="text-red-600 mt-1">{errors.password.message}</p>
+              )}
               <span
                 className="absolute text-2xl right-3 top-2.5 text-primary cursor-pointer z-30"
                 onClick={() => setShowPassword(!showPassword)}
@@ -68,10 +110,7 @@ const SignIn = () => {
               </span>
             </div>
             <div className="flex items-start text-secondary">
-              <Link
-                to={"/password-reset"}
-                className="link link-hover"
-              >
+              <Link to={"/password-reset/"} className="link link-hover">
                 Forgot password?
               </Link>
             </div>
@@ -96,7 +135,10 @@ const SignIn = () => {
         </p>
         <div className="divider text-secondary-content">OR</div>
 
-        <Link className="text-secondary bg-transparent font-semibold border-2 primary hover:text-white hover:border-primary py-2.5 rounded-sm px-[26px] hover:bg-primary duration-400 cursor-pointer text-center inline-block justify-center w-full">
+        <Link
+          onClick={handleGoogleSignIn}
+          className="text-secondary bg-transparent font-semibold border-2 primary hover:text-white hover:border-primary py-2.5 rounded-sm px-[26px] hover:bg-primary duration-400 cursor-pointer text-center inline-block justify-center w-full"
+        >
           <span className="flex gap-2 items-center justify-center">
             <span>
               <FcGoogle />
@@ -106,15 +148,6 @@ const SignIn = () => {
         </Link>
       </div>
     </div>
-    // <div>
-    //   <form action="" onSubmit={handleSubmit(onSubmit)}>
-    //     <label htmlFor="email">Email:</label>
-    //     <input type="email" id="email" name="email" {...register("email")} />
-    //     <label htmlFor="password">Password:</label>
-    //     <input type="password" id="password" name="password" {...register("password")} />
-    //     <input type="submit" value="Sign In" />
-    //   </form>
-    // </div>
   );
 };
 
