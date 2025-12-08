@@ -4,6 +4,8 @@ import SignUp from "../page/sign up/SignUp";
 import SignIn from "../page/sign in/SignIn";
 import Home from "../page/home/Home";
 import ResetPassword from "../page/reset-password/ResetPassword";
+import Books from "../page/Books/Books";
+import BookDetails from "../page/bookDetails/BookDetails";
 
 export const router = createBrowserRouter([
   {
@@ -25,7 +27,16 @@ export const router = createBrowserRouter([
       {
         path: "/password-reset",
         element: <ResetPassword/>,
+      },
+      {
+        path: '/books',
+        element: <Books/>,
+      },
+      {
+        path: '/books/:id',
+        element: <BookDetails />,
       }
+
     ],
   },
 

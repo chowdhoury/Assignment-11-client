@@ -3,6 +3,7 @@ import Logo from '../../components/shared/Logo';
 import { useForm } from 'react-hook-form';
 import useAuth from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
+import { useLocation, useNavigate } from 'react-router';
 
 const ResetPassword = () => {
     const {
@@ -10,7 +11,14 @@ const ResetPassword = () => {
         handleSubmit,
         formState: { errors },
       } = useForm();
-      const {resetPassword} = useAuth();
+      const navigate = useNavigate();
+      const location = useLocation();
+      const from = location.state?.from?.pathname || "/";
+      const {resetPassword,user} = useAuth();
+        if(user){
+            navigate(from, { replace: true });
+        }
+
     const onSubmit = (data) => {
         const { email } = data;
         resetPassword(email)
@@ -21,9 +29,10 @@ const ResetPassword = () => {
           toast.error(err.message);
         });
     }
+
     return (
-      <div className="min-h-screen w-full bg-primary flex justify-center items-center -mb-40">
-        <div className="bg-base-200/70 w-fit p-10 rounded-lg shadow-lg mt-20 mb-40">
+      <div className="min-h-screen w-full bg-base-200/30 flex justify-center items-center -mb-40">
+        <div className="bg-base-200 w-fit p-10 rounded-lg shadow-[0_6px_30px_rgba(0,0,0,0.25)] mt-20 mb-40">
           <figure className="flex justify-center mb-4">
             <Logo className="text-xl" />
           </figure>
@@ -35,7 +44,7 @@ const ResetPassword = () => {
             className="max-w-[400px] min-w-[350px]"
           >
             <fieldset className="fieldset">
-              <label className="label text-secondary">Email</label>
+              <label className="label text-secondary">Email <span style={{color:"red"}}>*</span></label>
               <input
                 type="email"
                 className="input w-full text-primary"

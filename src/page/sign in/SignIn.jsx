@@ -51,8 +51,8 @@ const SignIn = () => {
     };
 
   return (
-    <div className="min-h-screen w-full bg-primary flex justify-center items-center -mb-40">
-      <div className="bg-base-200/70 w-fit p-10 rounded-lg shadow-lg mt-20 mb-40">
+    <div className="min-h-screen w-full bg-base-200/30 flex justify-center items-center -mb-40">
+      <div className="bg-base-200/70 w-fit p-10 rounded-lg shadow-[0_6px_30px_rgba(0,0,0,0.25)] mt-20 mb-40">
         <figure className="flex justify-center mb-4">
           <Logo className="text-xl" />
         </figure>
@@ -64,7 +64,7 @@ const SignIn = () => {
           className="max-w-[400px] min-w-[350px]"
         >
           <fieldset className="fieldset">
-            <label className="label text-secondary">Email</label>
+            <label className="label text-secondary">Email <span style={{color:"red"}}>*</span></label>
             <input
               type="email"
               className="input w-full text-primary"
@@ -80,7 +80,7 @@ const SignIn = () => {
             {errors.email && (
               <p className="text-red-600">{errors.email.message}</p>
             )}
-            <label className="label text-secondary">Password</label>
+            <label className="label text-secondary">Password <span style={{color:"red"}}>*</span></label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
