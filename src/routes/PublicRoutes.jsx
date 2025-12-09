@@ -6,6 +6,7 @@ import Home from "../page/home/Home";
 import ResetPassword from "../page/reset-password/ResetPassword";
 import Books from "../page/Books/Books";
 import BookDetails from "../page/bookDetails/BookDetails";
+import DashboardLayout from "../layouts/DashboardLayout";
 
 export const router = createBrowserRouter([
   {
@@ -42,7 +43,7 @@ export const router = createBrowserRouter([
 
   {
     path: "/dashboard",
-    element: <h2>Dashboard Page</h2>,
+    element: <DashboardLayout />,
     // children: [
     //     {
     //         path: ''
