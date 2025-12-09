@@ -3,6 +3,7 @@ import demo from "../../assets/01.png";
 import { CiHeart } from "react-icons/ci";
 import toast from "react-hot-toast";
 import { FaStar } from "react-icons/fa";
+import { Link } from "react-router";
 
 const BookCard = () => {
   const [isFavorite, setIsFavorite] = useState(false);
@@ -48,12 +49,12 @@ const BookCard = () => {
           <p className="font-semibold">3.4 (12)</p>
         </span>
       </div>
-      <button
-        to="/books"
-        className="bg-primary hover:bg-secondary text-white py-3 rounded-full font-semibold duration-400 w-full mt-7"
+      <Link
+        to="/books/1"
+        className="bg-primary hover:bg-secondary text-white py-3 rounded-full font-semibold duration-400 w-full mt-7 block text-center"
       >
         Details
-      </button>
+      </Link>
     </div>
   );
 };

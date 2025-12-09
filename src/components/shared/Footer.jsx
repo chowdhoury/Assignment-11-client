@@ -102,6 +102,7 @@ const Footer = () => {
           </span>
         </div>
       </div>
+      <p className="text-[14px] text-secondary text-center">© 2025 Boimela. All rights reserved.</p>
     </div>
   );
 };

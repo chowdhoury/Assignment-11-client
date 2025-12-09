@@ -32,7 +32,7 @@
   --color-accent: #666666;
 } */
 
-/* @import "@smastrom/react-rating/style.css"; */
+@import "@smastrom/react-rating/style.css";
 
 * {
   font-family: "Sora", sans-serif;

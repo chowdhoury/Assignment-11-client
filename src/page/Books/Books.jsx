@@ -10,7 +10,7 @@ const Books = () => {
           <PageHero title="Books" />
         </header>
         <main className="w-4/5 mx-auto">
-          <div className='mt-10'>
+          <div className="mt-10">
             <p>Showing 1-20 of 100 Books</p>
           </div>
           <div className="grid grid-cols-11 gap-10 mt-3">
@@ -68,7 +68,7 @@ const Books = () => {
                 </button>
               </div>
             </aside>
-            <section className='col-span-8 grid grid-cols-4 gap-7'>
+            <section className="col-span-8 grid grid-cols-4 gap-x-7 gap-y-10">
               <BookCard />
               <BookCard />
               <BookCard />
