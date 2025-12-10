@@ -7,6 +7,9 @@ import ResetPassword from "../page/reset-password/ResetPassword";
 import Books from "../page/Books/Books";
 import BookDetails from "../page/bookDetails/BookDetails";
 import DashboardLayout from "../layouts/DashboardLayout";
+import MyOrders from "../components/dashBoard/myOrders/MyOrders";
+import Invoices from "../components/dashBoard/invoices/Invoices";
+import Wishlist from "../components/dashBoard/wishlist/Wishlist";
 
 export const router = createBrowserRouter([
   {
@@ -27,27 +30,63 @@ export const router = createBrowserRouter([
       },
       {
         path: "/password-reset",
-        element: <ResetPassword/>,
+        element: <ResetPassword />,
       },
       {
-        path: '/books',
-        element: <Books/>,
+        path: "/books",
+        element: <Books />,
       },
       {
-        path: '/books/:bookId',
+        path: "/books/:bookId",
         element: <BookDetails />,
-      }
-
+      },
     ],
   },
 
   {
     path: "/dashboard",
     element: <DashboardLayout />,
-    // children: [
-    //     {
-    //         path: ''
-    //     }
-    // ]
+    children: [
+      {
+        path: "/dashboard",
+        element: <div>Dashboard Home Page</div>,
+      },
+      {
+        path: "my-orders",
+        element: <MyOrders />,
+      },
+      {
+        path: "invoices",
+        element: <Invoices />,
+      },
+      {
+        path: "wishlist",
+        element: <Wishlist />,
+      },
+      {
+        path: "add-book",
+        element: <div>Add Book Page</div>,
+      },
+      {
+        path: "my-books",
+        element: <div>My Books Page</div>,
+      },
+      {
+        path: "orders",
+        element: <div>Orders Page</div>,
+      },
+      {
+        path: "manage-users",
+        element: <div>Manage Users Page</div>,
+      },
+      {
+        path: "manage-books",
+        element: <div>Manage Books Page</div>,
+      },
+      {
+        path: "profile",
+        element: <div>Profile Page</div>,
+      },
+    ],
   },
 ]);

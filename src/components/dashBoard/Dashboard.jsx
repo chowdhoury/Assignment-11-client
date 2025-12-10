@@ -6,6 +6,7 @@ import { LuBookCopy, LuShoppingCart, LuUserRoundCog } from "react-icons/lu";
 import { MdCardGiftcard, MdOutlineDashboard } from "react-icons/md";
 import { PiBooksLight, PiUserFocus } from "react-icons/pi";
 import { TbFileInvoice } from "react-icons/tb";
+import { Link } from 'react-router';
 
 const Dashboard = () => {
     return (
@@ -15,122 +16,133 @@ const Dashboard = () => {
           aria-label="close sidebar"
           className="drawer-overlay"
         ></label>
-        <div className="flex min-h-full flex-col items-start bg-black is-drawer-close:w-14 is-drawer-open:w-64 text-white">
+        <div className="flex min-h-full flex-col items-start bg-black is-drawer-close:w-18 is-drawer-open:w-64 text-white">
           {/* Sidebar content here */}
-          <ul className="menu w-full grow">
+          <ul className="menu w-full grow flex flex-col gap-2 p-4 text-base ">
             {/* List item */}
             <li>
-              <button
+              <Link
+                to="/"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="Home"
               >
                 {/* Home icon */}
                 <IoHomeOutline className="text-xl" />
                 <span className="is-drawer-close:hidden">Home</span>
-              </button>
+              </Link>
             </li>
             <li>
-              <button
+              <Link
+                to="/dashboard"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="Dashboard"
               >
                 {/* Home icon */}
                 <MdOutlineDashboard className="text-xl" />
                 <span className="is-drawer-close:hidden">Dashboard</span>
-              </button>
+              </Link>
             </li>
 
             {/* List item */}
             <li>
-              <button
+              <Link
+                to="/dashboard/my-orders"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="My Orders"
               >
                 {/* Settings icon */}
                 <LuShoppingCart className="text-xl" />
                 <span className="is-drawer-close:hidden">My Orders</span>
-              </button>
+              </Link>
             </li>
             <li>
-              <button
+              <Link
+              to="/dashboard/invoices"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="Invoices"
               >
                 {/* Settings icon */}
                 <TbFileInvoice className="text-xl" />
                 <span className="is-drawer-close:hidden">Invoice</span>
-              </button>
+              </Link>
             </li>
             <li>
-              <button
+              <Link
+                  to="/dashboard/wishlist"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="Wishlist"
               >
                 {/* Settings icon */}
                 <FaRegHeart className="text-xl" />
                 <span className="is-drawer-close:hidden">Wishlist</span>
-              </button>
+              </Link>
             </li>
 
             <li>
-              <button
+              <Link
+                  to="/dashboard/add-book"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="Add Book"
               >
                 {/* Settings icon */}
                 <CgAddR className="text-xl" />
                 <span className="is-drawer-close:hidden">Add Book</span>
-              </button>
+              </Link>
             </li>
             <li>
-              <button
+              <Link
+                  to="/dashboard/my-books"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="My Books"
               >
                 {/* Settings icon */}
                 <LuBookCopy className="text-xl" />
                 <span className="is-drawer-close:hidden">My Books</span>
-              </button>
+              </Link>
             </li>
             <li>
-              <button
+              <Link
+                  to="/dashboard/orders"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="Orders"
               >
                 {/* Settings icon */}
                 <MdCardGiftcard className="text-xl" />
                 <span className="is-drawer-close:hidden">Orders</span>
-              </button>
+              </Link>
             </li>
             <li>
-              <button
+              <Link
+                  to="/dashboard/manage-users"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="Manage Users"
               >
                 {/* Settings icon */}
                 <LuUserRoundCog className="text-xl" />
                 <span className="is-drawer-close:hidden">Manage Users</span>
-              </button>
+              </Link>
             </li>
             <li>
-              <button
+              <Link
+                  to="/dashboard/manage-books"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="Manage Books"
               >
                 {/* Settings icon */}
                 <PiBooksLight className="text-xl" />
                 <span className="is-drawer-close:hidden">Manage Books</span>
-              </button>
+              </Link>
             </li>
             <li>
-              <button
+              <Link
+                  to="/dashboard/profile"
                 className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
                 data-tip="Profile"
               >
                 {/* Settings icon */}
                 <PiUserFocus className="text-xl" />
                 <span className="is-drawer-close:hidden">Profile</span>
-              </button>
+              </Link>
             </li>
           </ul>
         </div>

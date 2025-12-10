@@ -21,11 +21,6 @@ const Navbar = () => {
         </NavLink>
       </li>
       <li>
-        <NavLink to="/request" className="hover:text-primary duration-300">
-          Request
-        </NavLink>
-      </li>
-      <li>
         <NavLink to="/dashboard" className="hover:text-primary duration-300">
           Dashboard
         </NavLink>

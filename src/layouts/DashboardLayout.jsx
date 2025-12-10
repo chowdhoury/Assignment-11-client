@@ -9,7 +9,7 @@ const DashboardLayout = () => {
         <input id="my-drawer-4" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content">
           {/* Navbar */}
-          <nav className="navbar w-full bg-base-300">
+          <nav className="navbar w-full bg-black text-white px-4">
             <label
               htmlFor="my-drawer-4"
               aria-label="open sidebar"
@@ -31,7 +31,7 @@ const DashboardLayout = () => {
                 <path d="M14 10l2 2l-2 2"></path>
               </svg>
             </label>
-            <div className="px-4">Dashboard</div>
+            <div className="px-4 text-lg font-semibold">Dashboard</div>
           </nav>
           {/* Page content here */}
           <div className="p-4"><Outlet /></div>
