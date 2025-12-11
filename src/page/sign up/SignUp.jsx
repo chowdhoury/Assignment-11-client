@@ -22,7 +22,7 @@ const SignUp = () => {
   const location = useLocation();
   const from = location.state || "/";
   if(user){
-    navigate(from, { replace: true });
+    // navigate(from, { replace: true });
   }
   const onSubmit = async (data) => {
     const { name, email, userImage, password } = data;

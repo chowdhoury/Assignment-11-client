@@ -27,12 +27,13 @@ const BookDetails = () => {
       <main className="w-4/5 mx-auto mt-10">
         <div>
           <div className="grid grid-cols-5  gap-15">
-            <figure className="col-span-2 h-[550px] bg-base-200/50 flex justify-center items-center rounded-lg border border-primary/30">
+            <figure className="relative col-span-2 h-[550px] bg-base-200/50 flex justify-center items-center rounded-lg border border-primary/30">
               <img
                 className="h-[410px] w-[315px]"
                 src="https://m.media-amazon.com/images/I/51N-u8AsmdL._SX329_BO1,204,203,200_.jpg"
                 alt="Book Cover"
               />
+              <p className="absolute top-5 left-5 text-white bg-primary px-4 py-2">Author</p>
             </figure>
             <div className="col-span-3 mt-3">
               <div className="flex justify-between items-center">
@@ -82,7 +83,7 @@ const BookDetails = () => {
               </div>
               <hr class="my-7 border-primary/30" />
 
-              <div className="border border-primary/30 rounded-md">
+              {/* <div className="border border-primary/30 rounded-md">
                 <div className="grid grid-cols-4 gap-y-3 bg-base-200/50 rounded-md p-5 m-2">
                   <p className="text-secondary font-bold">
                     SKU:{" "}
@@ -133,7 +134,7 @@ const BookDetails = () => {
                     </span>
                   </p>
                 </div>
-              </div>
+              </div> */}
               <div className="border border-primary/30 rounded-md mt-7">
                 <div className="grid grid-cols-2 gap-y-3 bg-base-200/50 rounded-md p-5 m-2">
                   <span className="flex items-center gap-2">

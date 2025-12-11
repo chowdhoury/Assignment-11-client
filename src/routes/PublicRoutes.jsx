@@ -10,6 +10,13 @@ import DashboardLayout from "../layouts/DashboardLayout";
 import MyOrders from "../components/dashBoard/myOrders/MyOrders";
 import Invoices from "../components/dashBoard/invoices/Invoices";
 import Wishlist from "../components/dashBoard/wishlist/Wishlist";
+import Orders from "../components/dashBoard/orders/Orders";
+import AddProducts from "../components/dashBoard/addProducts/AddProducts";
+import MyBooks from "../components/dashBoard/myBooks/MyBooks";
+import ManageUser from "../components/dashBoard/manageUser/ManageUser";
+import ManageBooks from "../components/dashBoard/manageBooks/ManageBooks";
+import UserProfile from "../components/dashBoard/userProfile/UserProfile";
+import DashboardHome from "../components/dashBoard/dasboardHome/DashboardHome";
 
 export const router = createBrowserRouter([
   {
@@ -49,7 +56,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/dashboard",
-        element: <div>Dashboard Home Page</div>,
+        element: <DashboardHome/>,
       },
       {
         path: "my-orders",
@@ -65,27 +72,27 @@ export const router = createBrowserRouter([
       },
       {
         path: "add-book",
-        element: <div>Add Book Page</div>,
+        element: <AddProducts />,
       },
       {
         path: "my-books",
-        element: <div>My Books Page</div>,
+        element: <MyBooks />,
       },
       {
         path: "orders",
-        element: <div>Orders Page</div>,
+        element: <Orders />,
       },
       {
         path: "manage-users",
-        element: <div>Manage Users Page</div>,
+        element: <ManageUser />,
       },
       {
         path: "manage-books",
-        element: <div>Manage Books Page</div>,
+        element: <ManageBooks />,
       },
       {
         path: "profile",
-        element: <div>Profile Page</div>,
+        element: <UserProfile />,
       },
     ],
   },
