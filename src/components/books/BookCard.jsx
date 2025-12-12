@@ -55,7 +55,7 @@ const BookCard = ({ book }) => {
         <figure className=" bg-base-200 rounded-lg flex items-center justify-center h-72 overflow-hidden">
           <img
             className="h-[250px] w-[180px] group-hover:h-[200px] group-hover:w-[140px] duration-600"
-            src={demo}
+            src={bookCover}
             alt=""
           />
         </figure>
@@ -82,7 +82,7 @@ const BookCard = ({ book }) => {
         <span className="italic font-bold">by</span> {author}
       </p>
       <div className="flex justify-between text-secondary-content items-center">
-        <p className="font-bold">$19.99</p>
+        <p className="font-bold">${price}</p>
         <span className="flex items-center gap-2 ">
           <span className="text-yellow-500 text-xl">
             <FaStar />
@@ -91,7 +91,7 @@ const BookCard = ({ book }) => {
         </span>
       </div>
       <Link
-        to="/books/1"
+        to={`/books/${_id}`}
         className="bg-primary hover:bg-secondary text-white py-3 rounded-full font-semibold duration-400 w-full mt-7 block text-center"
       >
         Details

@@ -46,6 +46,8 @@ export const router = createBrowserRouter([
       {
         path: "/books/:bookId",
         element: <BookDetails />,
+        loader: ({ params }) =>
+          fetch(`${import.meta.env.VITE_server_url}/books/${params.bookId}`),
       },
     ],
   },
@@ -56,7 +58,7 @@ export const router = createBrowserRouter([
     children: [
       {
         path: "/dashboard",
-        element: <DashboardHome/>,
+        element: <DashboardHome />,
       },
       {
         path: "my-orders",

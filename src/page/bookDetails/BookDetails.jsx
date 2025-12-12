@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PageHero from "../../components/shared/PageHero";
-import { Link } from "react-router";
+import { Link, useLoaderData } from "react-router";
 import { CiHeart } from "react-icons/ci";
 import { FaCheck } from "react-icons/fa";
 import { Rating, Star } from "@smastrom/react-rating";
@@ -19,6 +19,9 @@ const BookDetails = () => {
     inactiveStrokeColor: "var(--color-primary)",
     activeStrokeColor: "var(--color-primary)",
   };
+  const book=useLoaderData();
+  const { _id, bookCover, price, bookTitle, author, description } = book;
+  console.log(book);
   return (
     <div>
       <header>
@@ -30,7 +33,7 @@ const BookDetails = () => {
             <figure className="relative col-span-2 h-[550px] bg-base-200/50 flex justify-center items-center rounded-lg border border-primary/30">
               <img
                 className="h-[410px] w-[315px]"
-                src="https://m.media-amazon.com/images/I/51N-u8AsmdL._SX329_BO1,204,203,200_.jpg"
+                src={bookCover}
                 alt="Book Cover"
               />
               <p className="absolute top-5 left-5 text-white bg-primary px-4 py-2">Author</p>
@@ -38,7 +41,7 @@ const BookDetails = () => {
             <div className="col-span-3 mt-3">
               <div className="flex justify-between items-center">
                 <h1 className="text-4xl font-bold text-secondary">
-                  Castle The Sky
+                  {bookTitle}
                 </h1>
                 <h3 className="text-xl font-semibold text-green-500">
                   Available
@@ -55,12 +58,9 @@ const BookDetails = () => {
                 <p className="text-secondary-content">(1 Customer Review)</p>
               </div>
               <p className="text-secondary-content font-semibold">
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit. Quo
-                laborum nobis, modi veniam ducimus quia voluptates cum. Tenetur,
-                sunt ducimus laudantium maxime commodi magni eveniet rerum eaque
-                quis ea quo?
+                {description}
               </p>
-              <h1 className="text-3xl font-bold text-primary my-5">$16.00</h1>
+              <h1 className="text-3xl font-bold text-primary my-5">${price}</h1>
               <div className="flex gap-5 items-center">
                 <button className="bg-primary hover:bg-secondary text-white rounded-full font-semibold duration-400 px-10 py-3">
                   Order Now
@@ -81,7 +81,7 @@ const BookDetails = () => {
                   </span>
                 )}
               </div>
-              <hr class="my-7 border-primary/30" />
+              <hr   className="my-7 border-primary/30" />
 
               {/* <div className="border border-primary/30 rounded-md">
                 <div className="grid grid-cols-4 gap-y-3 bg-base-200/50 rounded-md p-5 m-2">
@@ -169,7 +169,7 @@ const BookDetails = () => {
             <h2 className="text-lg text-primary font-bold text-center">
               Reviews (3)
             </h2>
-            <hr class="my-7 border-primary/30" />
+            <hr className="my-7 border-primary/30" />
             <div className="px-10">
               <form action="">
                 <h1 className="text-secondary text-2xl font-bold mb-2">
@@ -201,9 +201,11 @@ const BookDetails = () => {
                 </button>
               </form>
             </div>
-            <hr class="my-7 border-primary/30" />
+            <hr   className="my-7 border-primary/30" />
             <div className="flex flex-col gap-5">
               <ReviewCard/>
+            <hr className=" border-primary/30" />
+              {/* <ReviewCard/>
             <hr class=" border-primary/30" />
               <ReviewCard/>
             <hr class=" border-primary/30" />
@@ -216,9 +218,7 @@ const BookDetails = () => {
               <ReviewCard/>
             <hr class=" border-primary/30" />
               <ReviewCard/>
-            <hr class=" border-primary/30" />
-              <ReviewCard/>
-            <hr class=" border-primary/30" />
+            <hr class=" border-primary/30" /> */}
             </div>
           </div>
         </div>

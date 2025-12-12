@@ -14,7 +14,7 @@ const ReviewCard = () => {
   return (
     <div className="flex gap-5 mx-10">
       <figure>
-        <img src="" alt="" />
+        {/* <img src="" alt="" /> */}
         <CgProfile className="w-20 h-20 rounded-full text-primary" />
       </figure>
       <div>

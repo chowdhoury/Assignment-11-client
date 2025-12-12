@@ -1,168 +1,259 @@
 import React, { useState, useEffect } from "react";
 import useAxios from "../../../hooks/useAxios";
-import { Link } from "react-router";
-import toast from "react-hot-toast";
-import { FaStar, FaEdit, FaTrash, FaSearch, FaFilter } from "react-icons/fa";
+import useAuth from "../../../hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+
 
 const ManageBooks = () => {
-  const axiosInstance = useAxios();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterCategory, setFilterCategory] = useState("All");
-  const [sortBy, setSortBy] = useState("newest");
+  const [deleteLoading, setDeleteLoading] = useState(null);
 
-  // Fetch books from API
+  const axios = useAxios();
+  const { user } = useAuth();
+  const { data } = useQuery({
+    queryKey: ["books"],
+    queryFn: async () => {
+      const books = await axios.get(`/books`);
+      return books.data;
+    },
+  });
+  console.log(data);
+
   useEffect(() => {
-    fetchBooks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const booksData = data || [];
+    setBooks(booksData);
+    setLoading(false);
+  }, [data]);
 
-  const fetchBooks = async () => {
-    try {
-      setLoading(true);
-      // Replace with your actual API endpoint
-      const response = await axiosInstance.get("/books");
-      setBooks(response.data);
-    } catch (error) {
-      console.error("Error fetching books:", error);
-      // Fallback to sample data for demonstration
-      setBooks([
-        {
-          _id: "1",
-          title: "The Great Gatsby",
-          author: "F. Scott Fitzgerald",
-          price: 15.99,
-          category: "Fiction",
-          imageURL: "https://via.placeholder.com/150",
-          rating: 4.5,
-          reviews: 120,
-          stock: 25,
-          publishedYear: 1925,
-          createdAt: "2024-12-01",
-        },
-        {
-          _id: "2",
-          title: "To Kill a Mockingbird",
-          author: "Harper Lee",
-          price: 12.99,
-          category: "Fiction",
-          imageURL: "https://via.placeholder.com/150",
-          rating: 4.8,
-          reviews: 250,
-          stock: 15,
-          publishedYear: 1960,
-          createdAt: "2024-11-28",
-        },
-        {
-          _id: "3",
-          title: "1984",
-          author: "George Orwell",
-          price: 14.5,
-          category: "Science Fiction",
-          imageURL: "https://via.placeholder.com/150",
-          rating: 4.7,
-          reviews: 180,
-          stock: 30,
-          publishedYear: 1949,
-          createdAt: "2024-11-25",
-        },
-        {
-          _id: "4",
-          title: "Pride and Prejudice",
-          author: "Jane Austen",
-          price: 13.99,
-          category: "Romance",
-          imageURL: "https://via.placeholder.com/150",
-          rating: 4.6,
-          reviews: 95,
-          stock: 20,
-          publishedYear: 1813,
-          createdAt: "2024-11-20",
-        },
-        {
-          _id: "5",
-          title: "The Catcher in the Rye",
-          author: "J.D. Salinger",
-          price: 16.99,
-          category: "Fiction",
-          imageURL: "https://via.placeholder.com/150",
-          rating: 4.3,
-          reviews: 75,
-          stock: 10,
-          publishedYear: 1951,
-          createdAt: "2024-11-15",
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteBook = async (bookId, bookTitle) => {
-    if (window.confirm(`Are you sure you want to delete "${bookTitle}"?`)) {
+  const handleDelete = async (bookId) => {
+    if (window.confirm("Are you sure you want to delete this book?")) {
+      setDeleteLoading(bookId);
       try {
-        // Replace with your actual API endpoint
-        await axiosInstance.delete(`/books/${bookId}`);
         setBooks(books.filter((book) => book._id !== bookId));
-        toast.success("Book deleted successfully!");
+        alert("Book deleted successfully!");
       } catch (error) {
         console.error("Error deleting book:", error);
-        toast.error("Failed to delete book");
+        alert("Failed to delete book. Please try again.");
+      } finally {
+        setDeleteLoading(null);
       }
     }
   };
 
-  const getStockBadge = (stock) => {
-    if (stock === 0) return "badge badge-error text-white";
-    if (stock < 15) return "badge badge-warning text-white";
-    return "badge badge-success text-white";
+  const handleEdit = (bookId) => {
+    console.log("Edit book:", bookId);
+    alert(`Edit functionality for book ${bookId} - Coming soon!`);
   };
 
-  const getStockLabel = (stock) => {
-    if (stock === 0) return "Out of Stock";
-    if (stock < 15) return `Low Stock (${stock})`;
-    return `In Stock (${stock})`;
+  const getStockStatus = (stock) => {
+    if (stock === 0)
+      return { text: "Out of Stock", class: "text-red-600 font-semibold" };
+    if (stock < 10)
+      return { text: "Low Stock", class: "text-orange-600 font-semibold" };
+    return { text: "In Stock", class: "text-green-600 font-semibold" };
   };
 
-  // Filter and search books
-  const filteredBooks = books
-    .filter((book) => {
-      const matchesCategory =
-        filterCategory === "All" || book.category === filterCategory;
-      const matchesSearch =
-        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchesCategory && matchesSearch;
-    })
-    .sort((a, b) => {
-      if (sortBy === "newest") {
-        return new Date(b.createdAt) - new Date(a.createdAt);
-      } else if (sortBy === "oldest") {
-        return new Date(a.createdAt) - new Date(b.createdAt);
-      } else if (sortBy === "price-low") {
-        return a.price - b.price;
-      } else if (sortBy === "price-high") {
-        return b.price - a.price;
-      } else if (sortBy === "rating") {
-        return b.rating - a.rating;
-      }
-      return 0;
-    });
-
-  // Get unique categories
-  const categories = ["All", ...new Set(books.map((book) => book.category))];
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="loading loading-spinner loading-lg text-primary"></div>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full min-h-screen bg-linear-to-br from-base-200 via-white to-base-200 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 border-t-4 border-primary">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="bg-primary/10 p-4 rounded-xl">
+    <div className="p-6 bg-base-100 min-h-screen">
+      {/* Header Section */}
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-gray-800 mb-2">My Books</h2>
+        <p className="text-gray-600">
+          Manage your book inventory and track sales
+        </p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-lg p-4 text-white shadow-lg">
+          <div className="text-sm opacity-90">Total Books</div>
+          <div className="text-3xl font-bold">{books.length}</div>
+        </div>
+        <div className="bg-linear-to-br from-green-500 to-green-600 rounded-lg p-4 text-white shadow-lg">
+          <div className="text-sm opacity-90">Published</div>
+          <div className="text-3xl font-bold">
+            {books.filter((b) => b?.visibility === "public").length}
+          </div>
+        </div>
+        <div className="bg-linear-to-br from-orange-500 to-orange-600 rounded-lg p-4 text-white shadow-lg">
+          <div className="text-sm opacity-90">Unpublished</div>
+          <div className="text-3xl font-bold">
+            {books.filter((b) => b.visibility === "private").length}
+          </div>
+        </div>
+        {/* <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-lg p-4 text-white shadow-lg">
+          <div className="text-sm opacity-90">Total Value</div>
+          <div className="text-3xl font-bold">
+            $
+            {books
+              .reduce((sum, b) => sum + (b.bookPrice || 0) * (b.stock || 0), 0)
+              .toFixed(2)}
+          </div>
+        </div> */}
+      </div>
+
+      {/* Books Table */}
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="table w-full">
+            {/* head */}
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="text-gray-700 font-semibold">Image</th>
+                <th className="text-gray-700 font-semibold">Title</th>
+                <th className="text-gray-700 font-semibold">Author</th>
+                {/* <th className="text-gray-700 font-semibold">Category</th> */}
+                <th className="text-gray-700 font-semibold">Price</th>
+                <th className="text-gray-700 font-semibold">Status</th>
+                <th className="text-gray-700 font-semibold">Seller</th>
+                <th className="text-gray-700 font-semibold">Seller Email</th>
+                {/* <th className="text-gray-700 font-semibold">Year</th> */}
+                <th className="text-gray-700 font-semibold">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {books.map((book) => {
+                const stockStatus = getStockStatus(book.stock);
+                return (
+                  <tr
+                    key={book._id}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    <td>
+                      <div className="avatar">
+                        <div className="w-12 h-16 rounded">
+                          <img
+                            src={
+                              book.bookCover ||
+                              "https://via.placeholder.com/150"
+                            }
+                            alt={book.bookTitle}
+                            className="object-cover"
+                          />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="font-medium text-gray-800 max-w-xs">
+                      <div className="truncate" title={book.bookTitle}>
+                        {book.bookTitle}
+                      </div>
+                    </td>
+                    <td className="text-gray-600">{book.author}</td>
+                    {/* <td>
+                      <span className={getCategoryBadge(book.bookCategory)}>
+                        {book.bookCategory}
+                      </span>
+                    </td> */}
+                    <td className="text-gray-700 font-semibold">
+                      ${book?.price}
+                    </td>
+                    <td>
+                      <div className="flex flex-col">
+                        <span className="text-gray-700 font-medium">
+                          {book.stock}
+                        </span>
+                        <span className={`text-xs ${stockStatus.class}`}>
+                          {book.visibility === "private"
+                            ? "Unpublished"
+                            : "Published"}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="text-gray-700 font-semibold">
+                      {book?.seller?.name}
+                    </td>
+                    <td className="text-gray-700 font-semibold">
+                      {book?.seller?.email}
+                    </td>
+                    <td>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleEdit(book._id)}
+                          className="btn btn-sm bg-blue-500 hover:bg-blue-600 text-white border-none"
+                          title="Edit Book"
+                        >
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(book._id)}
+                          disabled={deleteLoading === book._id}
+                          className="btn btn-sm bg-red-500 hover:bg-red-600 text-white border-none"
+                          title="Delete Book"
+                        >
+                          {deleteLoading === book._id ? (
+                            <span className="loading loading-spinner loading-xs"></span>
+                          ) : (
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                              />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Empty State */}
+        {books.length === 0 && (
+          <div className="text-center py-12">
+            <svg
+              className="mx-auto h-12 w-12 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+              />
+            </svg>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              No books found
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Start by adding your first book to the inventory.
+            </p>
+            <div className="mt-6">
+              <button className="btn btn-primary">
                 <svg
-                  className="w-8 h-8 text-primary"
+                  className="w-5 h-5 mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -171,282 +262,12 @@ const ManageBooks = () => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                    d="M12 4v16m8-8H4"
                   />
                 </svg>
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-secondary-focus">
-                  Manage Books
-                </h1>
-                <p className="text-secondary-content mt-1">
-                  View, edit, and manage your book collection
-                </p>
-              </div>
+                Add New Book
+              </button>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="stats shadow">
-                <div className="stat py-4 px-6">
-                  <div className="stat-title text-xs">Total Books</div>
-                  <div className="stat-value text-2xl text-primary">
-                    {books.length}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Filters and Search Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Search */}
-            <div className="relative">
-              <label className="block text-sm font-semibold text-secondary-focus mb-2">
-                <FaSearch className="inline mr-2" />
-                Search Books
-              </label>
-              <input
-                type="text"
-                placeholder="Search by title or author..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all border-gray-200"
-              />
-            </div>
-
-            {/* Category Filter */}
-            <div>
-              <label className="block text-sm font-semibold text-secondary-focus mb-2">
-                <FaFilter className="inline mr-2" />
-                Category
-              </label>
-              <select
-                value={filterCategory}
-                onChange={(e) => setFilterCategory(e.target.value)}
-                className="select select-bordered w-full border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Sort By */}
-            <div>
-              <label className="block text-sm font-semibold text-secondary-focus mb-2">
-                Sort By
-              </label>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="select select-bordered w-full border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
-              >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="rating">Highest Rated</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Books List */}
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <span className="loading loading-spinner loading-lg text-primary"></span>
-          </div>
-        ) : filteredBooks.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-            <div className="bg-base-200 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg
-                className="w-12 h-12 text-secondary-content"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold text-secondary-focus mb-2">
-              No Books Found
-            </h3>
-            <p className="text-secondary-content">
-              Try adjusting your search or filter criteria
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {/* Desktop View - Table */}
-            <div className="hidden lg:block bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="table w-full">
-                  <thead className="bg-primary text-white">
-                    <tr>
-                      <th className="text-center">Image</th>
-                      <th>Book Details</th>
-                      <th>Author</th>
-                      <th>Category</th>
-                      <th>Price</th>
-                      <th>Rating</th>
-                      <th>Stock</th>
-                      <th className="text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredBooks.map((book) => (
-                      <tr key={book._id} className="hover:bg-base-100">
-                        <td className="text-center">
-                          <div className="avatar">
-                            <div className="w-16 h-20 rounded-lg">
-                              <img
-                                src={book.imageURL}
-                                alt={book.title}
-                                className="object-cover"
-                              />
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="font-bold text-secondary-focus">
-                            {book.title}
-                          </div>
-                          <div className="text-sm text-secondary-content">
-                            Published: {book.publishedYear}
-                          </div>
-                        </td>
-                        <td className="text-secondary-content">
-                          {book.author}
-                        </td>
-                        <td>
-                          <span className="badge badge-primary badge-outline">
-                            {book.category}
-                          </span>
-                        </td>
-                        <td className="font-bold text-primary">
-                          ${book.price.toFixed(2)}
-                        </td>
-                        <td>
-                          <div className="flex items-center gap-1">
-                            <FaStar className="text-yellow-500" />
-                            <span className="font-semibold">{book.rating}</span>
-                            <span className="text-xs text-secondary-content">
-                              ({book.reviews})
-                            </span>
-                          </div>
-                        </td>
-                        <td>
-                          <span className={getStockBadge(book.stock)}>
-                            {getStockLabel(book.stock)}
-                          </span>
-                        </td>
-                        <td>
-                          <div className="flex gap-2 justify-center">
-                            <button
-                              className="btn btn-sm btn-primary text-white"
-                              title="Edit Book"
-                            >
-                              <FaEdit />
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleDeleteBook(book._id, book.title)
-                              }
-                              className="btn btn-sm btn-error text-white"
-                              title="Delete Book"
-                            >
-                              <FaTrash />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Mobile View - Cards */}
-            <div className="grid grid-cols-1 gap-4 lg:hidden">
-              {filteredBooks.map((book) => (
-                <div
-                  key={book._id}
-                  className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow"
-                >
-                  <div className="flex gap-4">
-                    <div className="avatar shrink-0">
-                      <div className="w-24 h-32 rounded-lg">
-                        <img
-                          src={book.imageURL}
-                          alt={book.title}
-                          className="object-cover"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-lg text-secondary-focus mb-1 truncate">
-                        {book.title}
-                      </h3>
-                      <p className="text-sm text-secondary-content mb-2">
-                        by {book.author}
-                      </p>
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        <span className="badge badge-primary badge-outline badge-sm">
-                          {book.category}
-                        </span>
-                        <span
-                          className={`badge badge-sm ${getStockBadge(
-                            book.stock
-                          )}`}
-                        >
-                          {getStockLabel(book.stock)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-xl font-bold text-primary">
-                          ${book.price.toFixed(2)}
-                        </span>
-                        <div className="flex items-center gap-1">
-                          <FaStar className="text-yellow-500" />
-                          <span className="font-semibold">{book.rating}</span>
-                          <span className="text-xs text-secondary-content">
-                            ({book.reviews})
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <button className="btn btn-sm btn-primary text-white flex-1">
-                          <FaEdit className="mr-1" />
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteBook(book._id, book.title)}
-                          className="btn btn-sm btn-error text-white flex-1"
-                        >
-                          <FaTrash className="mr-1" />
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Results Summary */}
-        {!loading && filteredBooks.length > 0 && (
-          <div className="mt-6 text-center text-secondary-content">
-            Showing {filteredBooks.length} of {books.length} books
           </div>
         )}
       </div>
