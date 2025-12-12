@@ -50,7 +50,7 @@ const AddProducts = () => {
     }
   };
 
-  const { isError, mutateAsync } = useMutation({
+  const { mutateAsync } = useMutation({
     mutationFn: async (newBook) => {
       await axios.post("/books", newBook);
     },
@@ -72,7 +72,6 @@ const AddProducts = () => {
   return (
     <div className="w-full min-h-screen bg-linear-to-br from-base-200 via-white to-base-200 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 border-t-4 border-primary">
           <div className="flex items-center gap-4">
             <div className="bg-primary/10 p-4 rounded-xl">
@@ -103,9 +102,7 @@ const AddProducts = () => {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column - Main Info */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Basic Information */}
               <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
                 <div className="flex items-center gap-3 mb-6 pb-4 border-b-2 border-base-200">
                   <div className="bg-primary/10 p-2 rounded-lg">
@@ -341,6 +338,10 @@ const AddProducts = () => {
           <div className="mt-8 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="flex flex-col sm:flex-row gap-4 justify-end items-center">
               <button
+                onClick={() => {
+                  reset();
+                  setImagePreview(null);
+                }}
                 type="button"
                 className="w-full sm:w-auto px-8 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 flex items-center justify-center gap-2"
               >

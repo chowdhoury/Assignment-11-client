@@ -1,87 +1,34 @@
 import React, { useState, useEffect } from "react";
-// import useAxios from "../../../hooks/useAxios";
-// import useAuth from "../../../hooks/useAuth";
+import useAxios from "../../../hooks/useAxios";
+import useAuth from "../../../hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 
 const MyBooks = () => {
-  // const axios = useAxios();
-  // const { user } = useAuth();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState(null);
 
-  // Sample books data - replace with actual API call
+  const axios = useAxios();
+  const { user } = useAuth();
+  const { data } = useQuery({
+    queryKey: ["books", user?.email],
+    queryFn: async () => {
+      const books = await axios.get(`/books?email=${user?.email}`);
+      return books.data;
+    },
+  });
+  console.log(data);
+
   useEffect(() => {
-    // Simulating API call with sample data
-    const sampleBooks = [
-      {
-        _id: "1",
-        bookTitle: "The Great Gatsby",
-        bookAuthor: "F. Scott Fitzgerald",
-        bookPrice: 15.99,
-        bookCategory: "Fiction",
-        bookRating: 4.5,
-        publishedYear: 1925,
-        stock: 25,
-        imageUrl: "https://via.placeholder.com/150",
-      },
-      {
-        _id: "2",
-        bookTitle: "To Kill a Mockingbird",
-        bookAuthor: "Harper Lee",
-        bookPrice: 12.99,
-        bookCategory: "Classic",
-        bookRating: 4.8,
-        publishedYear: 1960,
-        stock: 15,
-        imageUrl: "https://via.placeholder.com/150",
-      },
-      {
-        _id: "3",
-        bookTitle: "1984",
-        bookAuthor: "George Orwell",
-        bookPrice: 14.5,
-        bookCategory: "Dystopian",
-        bookRating: 4.7,
-        publishedYear: 1949,
-        stock: 30,
-        imageUrl: "https://via.placeholder.com/150",
-      },
-      {
-        _id: "4",
-        bookTitle: "Pride and Prejudice",
-        bookAuthor: "Jane Austen",
-        bookPrice: 13.99,
-        bookCategory: "Romance",
-        bookRating: 4.6,
-        publishedYear: 1813,
-        stock: 20,
-        imageUrl: "https://via.placeholder.com/150",
-      },
-    ];
-
-    setBooks(sampleBooks);
+    const booksData = data || [];
+    setBooks(booksData);
     setLoading(false);
-
-    // Uncomment and modify for actual API call:
-    // fetchBooks();
-  }, []);
-
-  // const fetchBooks = async () => {
-  //   try {
-  //     const response = await axios.get("/books/my-books");
-  //     setBooks(response.data);
-  //     setLoading(false);
-  //   } catch (error) {
-  //     console.error("Error fetching books:", error);
-  //     setLoading(false);
-  //   }
-  // };
-
+  }, [data]);
+  
   const handleDelete = async (bookId) => {
     if (window.confirm("Are you sure you want to delete this book?")) {
       setDeleteLoading(bookId);
       try {
-        // await axios.delete(`/books/${bookId}`);
         setBooks(books.filter((book) => book._id !== bookId));
         alert("Book deleted successfully!");
       } catch (error) {
@@ -94,21 +41,8 @@ const MyBooks = () => {
   };
 
   const handleEdit = (bookId) => {
-    // Navigate to edit page or open edit modal
     console.log("Edit book:", bookId);
     alert(`Edit functionality for book ${bookId} - Coming soon!`);
-  };
-
-  const getCategoryBadge = (category) => {
-    const categoryStyles = {
-      Fiction: "badge badge-primary text-white",
-      Classic: "badge badge-secondary text-white",
-      Dystopian: "badge badge-accent text-white",
-      Romance: "badge badge-error text-white",
-      Mystery: "badge badge-warning text-white",
-      "Science Fiction": "badge badge-info text-white",
-    };
-    return categoryStyles[category] || "badge badge-ghost";
   };
 
   const getStockStatus = (stock) => {
@@ -144,26 +78,26 @@ const MyBooks = () => {
           <div className="text-3xl font-bold">{books.length}</div>
         </div>
         <div className="bg-linear-to-br from-green-500 to-green-600 rounded-lg p-4 text-white shadow-lg">
-          <div className="text-sm opacity-90">In Stock</div>
+          <div className="text-sm opacity-90">Published</div>
           <div className="text-3xl font-bold">
-            {books.filter((b) => b.stock > 0).length}
+            {books.filter((b) => b?.visibility === "public").length}
           </div>
         </div>
         <div className="bg-linear-to-br from-orange-500 to-orange-600 rounded-lg p-4 text-white shadow-lg">
-          <div className="text-sm opacity-90">Low Stock</div>
+          <div className="text-sm opacity-90">Unpublished</div>
           <div className="text-3xl font-bold">
-            {books.filter((b) => b.stock > 0 && b.stock < 10).length}
+            {books.filter((b) => b.visibility === "private").length}
           </div>
         </div>
-        <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-lg p-4 text-white shadow-lg">
+        {/* <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-lg p-4 text-white shadow-lg">
           <div className="text-sm opacity-90">Total Value</div>
           <div className="text-3xl font-bold">
             $
             {books
-              .reduce((sum, b) => sum + b.bookPrice * b.stock, 0)
+              .reduce((sum, b) => sum + (b.bookPrice || 0) * (b.stock || 0), 0)
               .toFixed(2)}
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Books Table */}
@@ -176,11 +110,11 @@ const MyBooks = () => {
                 <th className="text-gray-700 font-semibold">Image</th>
                 <th className="text-gray-700 font-semibold">Title</th>
                 <th className="text-gray-700 font-semibold">Author</th>
-                <th className="text-gray-700 font-semibold">Category</th>
+                {/* <th className="text-gray-700 font-semibold">Category</th> */}
                 <th className="text-gray-700 font-semibold">Price</th>
-                <th className="text-gray-700 font-semibold">Stock</th>
-                <th className="text-gray-700 font-semibold">Rating</th>
-                <th className="text-gray-700 font-semibold">Year</th>
+                <th className="text-gray-700 font-semibold">Status</th>
+                {/* <th className="text-gray-700 font-semibold">Rating</th>
+                <th className="text-gray-700 font-semibold">Year</th> */}
                 <th className="text-gray-700 font-semibold">Actions</th>
               </tr>
             </thead>
@@ -197,7 +131,8 @@ const MyBooks = () => {
                         <div className="w-12 h-16 rounded">
                           <img
                             src={
-                              book.imageUrl || "https://via.placeholder.com/150"
+                              book.bookCover ||
+                              "https://via.placeholder.com/150"
                             }
                             alt={book.bookTitle}
                             className="object-cover"
@@ -210,14 +145,14 @@ const MyBooks = () => {
                         {book.bookTitle}
                       </div>
                     </td>
-                    <td className="text-gray-600">{book.bookAuthor}</td>
-                    <td>
+                    <td className="text-gray-600">{book.author}</td>
+                    {/* <td>
                       <span className={getCategoryBadge(book.bookCategory)}>
                         {book.bookCategory}
                       </span>
-                    </td>
+                    </td> */}
                     <td className="text-gray-700 font-semibold">
-                      ${book.bookPrice.toFixed(2)}
+                      ${book?.price}
                     </td>
                     <td>
                       <div className="flex flex-col">
@@ -225,25 +160,12 @@ const MyBooks = () => {
                           {book.stock}
                         </span>
                         <span className={`text-xs ${stockStatus.class}`}>
-                          {stockStatus.text}
+                          {book.visibility === "private"
+                            ? "Unpublished"
+                            : "Published"}
                         </span>
                       </div>
                     </td>
-                    <td>
-                      <div className="flex items-center gap-1">
-                        <svg
-                          className="w-4 h-4 text-yellow-500"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                        <span className="text-gray-700 font-medium">
-                          {book.bookRating}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="text-gray-600">{book.publishedYear}</td>
                     <td>
                       <div className="flex gap-2">
                         <button
@@ -265,7 +187,7 @@ const MyBooks = () => {
                             />
                           </svg>
                         </button>
-                        <button
+                        {/* <button
                           onClick={() => handleDelete(book._id)}
                           disabled={deleteLoading === book._id}
                           className="btn btn-sm bg-red-500 hover:bg-red-600 text-white border-none"
@@ -288,7 +210,7 @@ const MyBooks = () => {
                               />
                             </svg>
                           )}
-                        </button>
+                        </button> */}
                       </div>
                     </td>
                   </tr>

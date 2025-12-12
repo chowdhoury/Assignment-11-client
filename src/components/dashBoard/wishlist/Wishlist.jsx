@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import BookCard from "../../books/bookCard";
 import { FaRegHeart } from "react-icons/fa";
 import { MdOutlineShoppingCart } from "react-icons/md";
+import BookCard from "../../books/bookCard";
 
 const Wishlist = () => {
   // Mock data - replace with actual data from API/context
@@ -60,7 +60,7 @@ const Wishlist = () => {
         <div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
             {wishlistItems.map((item) => (
-              <BookCard key={item.id} />
+              <BookCard key={item.id} book={item} />
             ))}
           </div>
 

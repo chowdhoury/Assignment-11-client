@@ -1,9 +1,20 @@
-import React from 'react';
 import PageHero from '../../components/shared/PageHero';
 import { Link } from 'react-router';
 import BookCard from '../../components/books/bookCard';
+import { useQuery } from '@tanstack/react-query';
+import useAxios from '../../hooks/useAxios';
+
 
 const Books = () => {
+  const axios = useAxios()
+  const {data}=useQuery({
+    queryKey: ['books'],
+    queryFn: async ()=>{
+      const books=await axios.get('/books')
+      return books.data;
+    }
+  })
+  console.log(data);
     return (
       <div>
         <header>
@@ -68,17 +79,13 @@ const Books = () => {
                 </button>
               </div>
             </aside>
-            <section className="col-span-8 grid grid-cols-4 gap-x-7 gap-y-10">
-              <BookCard />
-              <BookCard />
-              <BookCard />
-              <BookCard />
-              <BookCard />
-              <BookCard />
-              <BookCard />
-              <BookCard />
-              <BookCard />
-              <BookCard />
+            <section className="col-span-8 grid grid-cols-3 gap-x-7 gap-y-10">
+              {
+                data?.map(book=><BookCard
+                  key={book._id}
+                  book={book}
+                ></BookCard>)
+              }
             </section>
           </div>
         </main>
