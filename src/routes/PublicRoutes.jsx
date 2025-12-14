@@ -42,6 +42,8 @@ export const router = createBrowserRouter([
       {
         path: "/books",
         element: <Books />,
+        loader: () =>
+          fetch(`${import.meta.env.VITE_server_url}/books`),
       },
       {
         path: "/books/:bookId",

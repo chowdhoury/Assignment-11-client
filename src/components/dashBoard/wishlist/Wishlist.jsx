@@ -1,27 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaRegHeart } from "react-icons/fa";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import BookCard from "../../books/bookCard";
 
 const Wishlist = () => {
-  // Mock data - replace with actual data from API/context
-  const [wishlistItems, setWishlistItems] = useState([
-    { id: 1 },
-    { id: 2 },
-    { id: 3 },
-    { id: 4 },
-    { id: 5 },
-  ]);
-
-  const handleClearAll = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to clear all items from your wishlist?"
-      )
-    ) {
-      setWishlistItems([]);
-    }
-  };
+  const [wishlistItems, setWishlistItems] = useState([]);
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_server_url}/wishlist`, {
+      credentials: "include",
+    })
+      .then((response) => response.json())
+      .then((data) => setWishlistItems(data))
+      .catch((error) => console.error("Error fetching wishlist:", error));
+  }, []);
 
   return (
     <div className="min-h-screen bg-base-100 py-8 px-4 md:px-6 lg:px-8">
@@ -43,15 +34,6 @@ const Wishlist = () => {
               </p>
             </div>
           </div>
-
-          {wishlistItems.length > 0 && (
-            <button
-              onClick={handleClearAll}
-              className="btn btn-outline btn-error btn-sm"
-            >
-              Clear All
-            </button>
-          )}
         </div>
       </div>
 
@@ -74,10 +56,10 @@ const Wishlist = () => {
                 Add all items to cart and proceed to checkout
               </p>
             </div>
-            <button className="btn btn-primary gap-2">
+            {/* <button className="btn btn-primary gap-2">
               <MdOutlineShoppingCart className="text-xl" />
               Add All to Cart
-            </button>
+            </button> */}
           </div>
         </div>
       ) : (

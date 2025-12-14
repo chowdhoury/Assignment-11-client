@@ -1,16 +1,141 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PageHero from "../../components/shared/PageHero";
 import { Link, useLoaderData } from "react-router";
 import { CiHeart } from "react-icons/ci";
 import { FaCheck } from "react-icons/fa";
 import { Rating, Star } from "@smastrom/react-rating";
 import ReviewCard from "../../components/bookDetails/ReviewCard";
+import useAuth from "../../hooks/useAuth";
 
 const BookDetails = () => {
+  const book = useLoaderData();
+  const { _id, bookCover, price, bookTitle, description, author } = book;
+  const { user } = useAuth();
   const [ratingValue, setRatingValue] = useState(3);
   const [isFavorite, setIsFavorite] = useState(false);
-  const handleFavoriteClick = () => {
-    setIsFavorite(!isFavorite);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [orderData, setOrderData] = useState({
+    phoneNumber: "",
+    address: "",
+  });
+
+  // useEffect(() => {
+  //   const checkIfInWishlist = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         `${import.meta.env.VITE_server_url}/wishlist?userEmail=${
+  //           user?.email
+  //         }&bookId=${_id}`
+  //       ).then((res) => res.json()).then(data=> data ? setIsFavorite(true) : setIsFavorite(false));
+  //       if (response && response.length > 0) {
+  //         setIsFavorite(true);
+  //       } else {
+  //         setIsFavorite(false);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error checking wishlist:", error);
+  //     }
+  //   };
+
+  //   if (user?.email && _id) {
+  //     checkIfInWishlist();
+  //   }
+  // }, [user?.email, _id]);
+useEffect(() => {
+  const checkIfInWishlist = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_server_url}/wishlist?userEmail=${
+          user?.email
+        }&bookId=${_id}`
+      );
+
+      const data = await res.json();
+
+      // If response exists (object or non-empty array)
+      setIsFavorite(!!data && (Array.isArray(data) ? data.length > 0 : true));
+    } catch (error) {
+      console.error("Error checking wishlist:", error);
+      setIsFavorite(false);
+    }
+  };
+
+  if (user?.email && _id) {
+    checkIfInWishlist();
+  }
+}, [user?.email, _id]);
+
+  const handleFavoriteClick = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_server_url}/wishlist`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userEmail: user?.email,
+            bookId: _id,
+            bookTitle: bookTitle,
+            bookCover: bookCover,
+            author: author,
+            price: price,
+          }),
+        }
+      );
+      if (response.ok) {
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+    }
+  };
+
+  const handleFavoriteDeleteClick = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_server_url}/wishlist?userEmail=${
+          user?.email
+        }&bookId=${_id}`,
+        {
+          method: "DELETE",
+        }
+      );
+      if (response.ok) {
+        setIsFavorite(false);
+      }
+    } catch (error) {
+      console.error("Error removing from wishlist:", error);
+    }
+  };
+
+  const handleOrderClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setOrderData({ phoneNumber: "", address: "" });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setOrderData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleConfirmOrder = () => {
+    // Add your order submission logic here
+    console.log("Order confirmed:", {
+      name: user?.displayName,
+      email: user?.email,
+      phoneNumber: orderData.phoneNumber,
+      address: orderData.address,
+    });
+    handleCloseModal();
   };
   const customStyles = {
     itemShapes: Star,
@@ -19,8 +144,7 @@ const BookDetails = () => {
     inactiveStrokeColor: "var(--color-primary)",
     activeStrokeColor: "var(--color-primary)",
   };
-  const book=useLoaderData();
-  const { _id, bookCover, price, bookTitle, author, description } = book;
+
   console.log(book);
   return (
     <div>
@@ -36,7 +160,9 @@ const BookDetails = () => {
                 src={bookCover}
                 alt="Book Cover"
               />
-              <p className="absolute top-5 left-5 text-white bg-primary px-4 py-2">Author</p>
+              <p className="absolute top-5 left-5 text-white bg-primary px-4 py-2">
+                Author
+              </p>
             </figure>
             <div className="col-span-3 mt-3">
               <div className="flex justify-between items-center">
@@ -62,7 +188,10 @@ const BookDetails = () => {
               </p>
               <h1 className="text-3xl font-bold text-primary my-5">${price}</h1>
               <div className="flex gap-5 items-center">
-                <button className="bg-primary hover:bg-secondary text-white rounded-full font-semibold duration-400 px-10 py-3">
+                <button
+                  onClick={handleOrderClick}
+                  className="bg-primary hover:bg-secondary text-white rounded-full font-semibold duration-400 px-10 py-3"
+                >
                   Order Now
                 </button>
                 {!isFavorite ? (
@@ -74,67 +203,14 @@ const BookDetails = () => {
                   </span>
                 ) : (
                   <span
-                    onClick={handleFavoriteClick}
+                    onClick={handleFavoriteDeleteClick}
                     className="text-3xl cursor-pointer border border-primary rounded-full p-1 bg-primary text-white duration-300 h-10 w-10 flex items-center justify-center"
                   >
                     <CiHeart />
                   </span>
                 )}
               </div>
-              <hr   className="my-7 border-primary/30" />
-
-              {/* <div className="border border-primary/30 rounded-md">
-                <div className="grid grid-cols-4 gap-y-3 bg-base-200/50 rounded-md p-5 m-2">
-                  <p className="text-secondary font-bold">
-                    SKU:{" "}
-                    <span className="text-secondary-content font-semibold">
-                      FTC1020B65D
-                    </span>
-                  </p>
-                  <p className="text-secondary font-bold">
-                    Tags:
-                    <span className="text-secondary-content font-semibold">
-                      Design Low Book
-                    </span>
-                  </p>
-                  <p className="text-secondary font-bold">
-                    Total page:{" "}
-                    <span className="text-secondary-content font-semibold">
-                      330
-                    </span>
-                  </p>
-                  <p className="text-secondary font-bold">
-                    Publish Years:{" "}
-                    <span className="text-secondary-content font-semibold">
-                      2021
-                    </span>
-                  </p>
-                  <p className="text-secondary font-bold">
-                    Category:{" "}
-                    <span className="text-secondary-content font-semibold">
-                      Kids
-                    </span>
-                  </p>
-                  <p className="text-secondary font-bold">
-                    Format:{" "}
-                    <span className="text-secondary-content font-semibold">
-                      Hardcover
-                    </span>
-                  </p>
-                  <p className="text-secondary font-bold">
-                    Language:{" "}
-                    <span className="text-secondary-content font-semibold">
-                      English
-                    </span>
-                  </p>
-                  <p className="text-secondary font-bold">
-                    Century:{" "}
-                    <span className="text-secondary-content font-semibold">
-                      United States
-                    </span>
-                  </p>
-                </div>
-              </div> */}
+              <hr className="my-7 border-primary/30" />
               <div className="border border-primary/30 rounded-md mt-7">
                 <div className="grid grid-cols-2 gap-y-3 bg-base-200/50 rounded-md p-5 m-2">
                   <span className="flex items-center gap-2">
@@ -201,25 +277,9 @@ const BookDetails = () => {
                 </button>
               </form>
             </div>
-            <hr   className="my-7 border-primary/30" />
-            <div className="flex flex-col gap-5">
-              <ReviewCard/>
-            <hr className=" border-primary/30" />
-              {/* <ReviewCard/>
-            <hr class=" border-primary/30" />
-              <ReviewCard/>
-            <hr class=" border-primary/30" />
-              <ReviewCard/>
-            <hr class=" border-primary/30" />
-              <ReviewCard/>
-            <hr class=" border-primary/30" />
-              <ReviewCard/>
-            <hr class=" border-primary/30" />
-              <ReviewCard/>
-            <hr class=" border-primary/30" />
-              <ReviewCard/>
-            <hr class=" border-primary/30" /> */}
-            </div>
+            <hr className="my-7 border-primary/30" />
+            <ReviewCard />
+            {/* Review Cards would go here */}
           </div>
         </div>
       </main>

@@ -10,45 +10,9 @@ import useAuth from "../../hooks/useAuth";
 
 const BookCard = ({ book }) => {
   const {user}=useAuth();
-  const axios = useAxios();
-  // const { data } = useQuery({
-  //   queryKey: [book._id,user?.email],
-  //   queryFn: async () => {
-  //     const isExist = await axios.get("/wishlist", {
-  //       params: { bookId: book._id, userEmail: user?.email },
-  //     });
-  //     if(isExist.data){
-  //       setIsFavorite(true);
-  //     }
-  //     else{
-  //       setIsFavorite(false);
-  //     }
-  //   },
-  // });
-
-  const {_id, bookCover, price, bookTitle, author } = book;
+  const { _id, bookCover, bookTitle, author, price } = book;
   const [isFavorite, setIsFavorite] = useState(false);
-  const handleFavoriteClick = () => {
-    setIsFavorite(!isFavorite);
-    if (!isFavorite) {
-      mutateAsync({ bookId: _id, bookTitle, author, bookCover, price, createdAt: new Date(), userEmail: user.email });
-    }
-  };
-  const { mutateAsync } = useMutation({
-    mutationFn: async (newBook) => {
-      await axios.post("/wishlist", newBook);
-    },
-    onSuccess: (data) => {
-      toast.success("Book added to wishlist");
-    },
-    onError: (error) => {
-      console.error("Error adding book", error);
-    },
-    onMutate: (variables) => {
-      console.log("Adding book...", variables);
-    },
-    retry: 2,
-  });
+
   return (
     <div>
       <div className="relative group">
@@ -59,7 +23,7 @@ const BookCard = ({ book }) => {
             alt=""
           />
         </figure>
-        {!isFavorite ? (
+        {/* {!isFavorite ? (
           <span
             onClick={handleFavoriteClick}
             className="absolute top-4 right-3 text-3xl text-primary cursor-pointer border border-primary rounded-full p-1 hover:bg-primary hover:text-white duration-300"
@@ -73,7 +37,7 @@ const BookCard = ({ book }) => {
           >
             <CiHeart />
           </span>
-        )}
+        )} */}
       </div>
       <h2 className="text-primary font-semibold mt-4 text-[18px]">
         {bookTitle}

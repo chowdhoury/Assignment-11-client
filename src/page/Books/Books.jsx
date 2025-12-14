@@ -1,20 +1,23 @@
 import PageHero from '../../components/shared/PageHero';
-import { Link } from 'react-router';
+import { Link, useLoaderData } from 'react-router';
 import BookCard from '../../components/books/bookCard';
 import { useQuery } from '@tanstack/react-query';
 import useAxios from '../../hooks/useAxios';
+import { useState } from 'react';
 
 
 const Books = () => {
-  const axios = useAxios()
-  const {data}=useQuery({
-    queryKey: ['books'],
-    queryFn: async ()=>{
-      const books=await axios.get('/books')
-      return books.data;
-    }
-  })
-  console.log(data);
+  const data=useLoaderData();
+  // const [books,setBooks]=useState(data);
+  // const axios = useAxios()
+  // const {data}=useQuery({
+  //   queryKey: ['books'],
+  //   queryFn: async ()=>{
+  //     const books=await axios.get('/books')
+  //     return books.data;
+  //   }
+  // })
+  // console.log(data);
     return (
       <div>
         <header>
