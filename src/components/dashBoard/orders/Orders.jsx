@@ -30,7 +30,7 @@ const Orders = () => {
     if (user) {
       fetchOrders();
     }
-  }, [refetch, user?.email]);
+  }, [refetch, user]);
 
   // console.log(orders);
 
@@ -69,8 +69,8 @@ const Orders = () => {
           body: JSON.stringify({ status: newStatus }),
         }
       );
-      const data = await response.json();
-      // console.log("Order status updated:", data);
+      await response.json();
+      // console.log("Order status updated");
       setRefetch(!refetch);
     } catch (error) {
       console.error("Error updating order status:", error);

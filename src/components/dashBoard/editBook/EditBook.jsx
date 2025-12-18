@@ -1,6 +1,5 @@
-import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { set, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import useAuth from "../../../hooks/useAuth";
 import { imageUpload } from "../../../utils/UploadImage";
 import toast from "react-hot-toast";
@@ -17,7 +16,6 @@ const EditBook = () => {
   const {
     register,
     handleSubmit,
-    reset,
     formState: { errors },
     setValue,
   } = useForm();
@@ -62,7 +60,6 @@ const EditBook = () => {
 
       const file = data.bookCover?.[0];
 
-      // ✅ THIS is the critical fix
       if (file instanceof File) {
         bookCoverUrl = await imageUpload(file);
       }
@@ -99,8 +96,6 @@ const EditBook = () => {
       setIsSubmitting(false);
     }
   };
-
-
 
   return (
     <div className="w-full min-h-screen bg-linear-to-br from-base-200 via-white to-base-200 py-8 px-4 sm:px-6 lg:px-8">

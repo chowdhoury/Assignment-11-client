@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-import useAxios from "../../../hooks/useAxios";
 import useAuth from "../../../hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
 import Swal from "sweetalert2";
 
 const ManageBooks = () => {
@@ -30,17 +28,14 @@ const ManageBooks = () => {
   }, [refetch, user?.accessToken]);
 
   const handleVisibilityChange = async (bookId, newStatus) => {
-    const result = await fetch(
-      `${import.meta.env.VITE_server_url}/allbooks/${bookId}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${user?.accessToken}`,
-        },
-        body: JSON.stringify({ visibility: newStatus }),
-      }
-    );
+    await fetch(`${import.meta.env.VITE_server_url}/allbooks/${bookId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${user?.accessToken}`,
+      },
+      body: JSON.stringify({ visibility: newStatus }),
+    });
     setRefetch(!refetch);
     // You might want to refetch the books or update the state here
     console.log(`Change status for book ${bookId} to ${newStatus}`);
@@ -57,15 +52,12 @@ const ManageBooks = () => {
       confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const response = await fetch(
-          `${import.meta.env.VITE_server_url}/books/${bookId}`,
-          {
-            method: "DELETE",
-            headers: {
-              authorization: `Bearer ${user?.accessToken}`,
-            },
-          }
-        );
+        await fetch(`${import.meta.env.VITE_server_url}/books/${bookId}`, {
+          method: "DELETE",
+          headers: {
+            authorization: `Bearer ${user?.accessToken}`,
+          },
+        });
         setRefetch(!refetch);
         Swal.fire({
           title: "Deleted!",

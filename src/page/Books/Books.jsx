@@ -1,8 +1,6 @@
 import PageHero from "../../components/shared/PageHero";
 import { Link, useLoaderData } from "react-router";
-import BookCard from "../../components/books/bookCard";
-import { useQuery } from "@tanstack/react-query";
-import useAxios from "../../hooks/useAxios";
+import BookCard from "../../components/books/BookCard";
 import { useState, useEffect } from "react";
 
 const Books = () => {
@@ -65,10 +63,6 @@ const Books = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     // Search is handled by useEffect
-  };
-
-  const handleFilter = () => {
-    // Filter is handled by useEffect
   };
 
   const handleReset = () => {

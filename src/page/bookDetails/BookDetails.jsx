@@ -1,6 +1,6 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useState, useEffect } from "react";
 import PageHero from "../../components/shared/PageHero";
-import { Link, useLoaderData, useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { CiHeart } from "react-icons/ci";
 import { FaCheck } from "react-icons/fa";
 import { Rating, Star } from "@smastrom/react-rating";
@@ -12,7 +12,7 @@ import useRole from "../../hooks/useRole";
 import { auth } from "../../firebase/Firebase.config";
 
 const BookDetails = () => {
-  const { role, loading } = useRole();
+  const { role } = useRole();
   const [book, setBook] = useState({});
   const { bookId } = useParams();
   const { _id, bookCover, price, bookTitle, description, author } = book;
@@ -38,7 +38,7 @@ const BookDetails = () => {
     };
 
     fetchBook();
-  }, [user]);
+  }, [user, bookId]);
 
   useEffect(() => {
     const checkIfInWishlist = async () => {
@@ -242,7 +242,7 @@ const BookDetails = () => {
         });
         navigate("/dashboard/my-orders");
       }
-    } catch (err) {
+    } catch {
       Swal.fire({
         icon: "error",
         title: "Order Failed",
@@ -333,7 +333,7 @@ const BookDetails = () => {
               <div className="border border-primary/30 rounded-md mt-5 sm:mt-7">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 bg-base-200/50 rounded-md p-3 sm:p-5 m-2">
                   <span className="flex items-center gap-2">
-                    <span className="text-primary flex-shrink-0">
+                    <span className="text-primary shrink-0">
                       <FaCheck />
                     </span>
                     <p className="text-sm sm:text-base">
@@ -341,7 +341,7 @@ const BookDetails = () => {
                     </p>
                   </span>
                   <span className="flex items-center gap-2">
-                    <span className="text-primary flex-shrink-0">
+                    <span className="text-primary shrink-0">
                       <FaCheck />
                     </span>
                     <p className="text-sm sm:text-base">
@@ -349,7 +349,7 @@ const BookDetails = () => {
                     </p>
                   </span>
                   <span className="flex items-center gap-2">
-                    <span className="text-primary flex-shrink-0">
+                    <span className="text-primary shrink-0">
                       <FaCheck />
                     </span>
                     <p className="text-sm sm:text-base">
@@ -357,7 +357,7 @@ const BookDetails = () => {
                     </p>
                   </span>
                   <span className="flex items-center gap-2">
-                    <span className="text-primary flex-shrink-0">
+                    <span className="text-primary shrink-0">
                       <FaCheck />
                     </span>
                     <p className="text-sm sm:text-base">

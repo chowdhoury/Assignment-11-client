@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import useAxios from "../../../hooks/useAxios";
 import useAuth from "../../../hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
-import { use } from "react";
 import { Link } from "react-router";
 
 const MyBooks = () => {
@@ -32,19 +29,15 @@ const MyBooks = () => {
   }, [refetch, user]);
 
   const handleVisibilityChange = async (bookId, newStatus) => {
-    const result = await fetch(
-      `${import.meta.env.VITE_server_url}/allbooks/${bookId}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${user?.accessToken}`,
-        },
-        body: JSON.stringify({ visibility: newStatus }),
-      }
-    );
+    await fetch(`${import.meta.env.VITE_server_url}/allbooks/${bookId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${user?.accessToken}`,
+      },
+      body: JSON.stringify({ visibility: newStatus }),
+    });
     setRefetch(!refetch);
-    // You might want to refetch the books or update the state here
     console.log(`Change status for book ${bookId} to ${newStatus}`);
   };
 

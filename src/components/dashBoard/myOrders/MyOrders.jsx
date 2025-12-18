@@ -33,7 +33,7 @@ const MyOrders = () => {
     if (user) {
       fetchOrders();
     }
-  }, [refetch, user?.email]);
+  }, [refetch, user]);
 
   const getStatusBadge = (status) => {
     const statusStyles = {
@@ -119,21 +119,9 @@ const MyOrders = () => {
           body: JSON.stringify(order),
         })
           .then((res) => res.json())
-          .then(
-            (data) => {
-              window.location.href = data.url;
-              // console.log("Payment intent created:", data);
-              // Redirect to payment gateway with the client secret
-              // For example, using Stripe.js
-              // const stripe = Stripe('your-publishable-key-here');
-              // stripe.redirectToCheckout({ sessionId: data.sessionId });
-            }
-            // Swal.fire({
-            //   title: "Deleted!",
-            //   text: "Your file has been deleted.",
-            //   icon: "success",
-            // });
-          )
+          .then((data) => {
+            window.location.href = data.url;
+          })
           .catch((error) => {
             console.error("Error creating payment intent:", error);
             Swal.fire(

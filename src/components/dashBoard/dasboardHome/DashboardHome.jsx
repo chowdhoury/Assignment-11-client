@@ -13,6 +13,54 @@ import {
 } from "react-icons/fa";
 import { Link } from "react-router";
 
+// StatCard component moved outside to avoid recreation on each render
+const StatCard = ({ icon, title, value, trend, color, link }) => {
+  const IconComponent = icon;
+  return (
+    <Link
+      to={link}
+      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border-l-4 hover:scale-105 cursor-pointer"
+      style={{ borderLeftColor: color }}
+    >
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-gray-600 font-medium mb-1">{title}</p>
+          <h3 className="text-3xl font-bold text-gray-800">
+            {title === "Revenue" ? `$${value.toFixed(2)}` : value}
+          </h3>
+          {trend && (
+            <div
+              className={`flex items-center gap-1 mt-2 text-sm ${
+                trend > 0 ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {trend > 0 ? <FaArrowUp /> : <FaArrowDown />}
+              <span>{Math.abs(trend)}% from last month</span>
+            </div>
+          )}
+        </div>
+        <div
+          className="p-4 rounded-full"
+          style={{ backgroundColor: `${color}20` }}
+        >
+          <IconComponent className="text-3xl" style={{ color }} />
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+// formatDate function moved outside
+const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
 const DashboardHome = () => {
   // Mock data for UI display
   const stats = {
@@ -45,49 +93,6 @@ const DashboardHome = () => {
       status: "processing",
     },
   ];
-
-  const StatCard = ({ icon: Icon, title, value, trend, color, link }) => (
-    <Link
-      to={link}
-      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border-l-4 hover:scale-105 cursor-pointer"
-      style={{ borderLeftColor: color }}
-    >
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-gray-600 font-medium mb-1">{title}</p>
-          <h3 className="text-3xl font-bold text-gray-800">
-            {title === "Revenue" ? `$${value.toFixed(2)}` : value}
-          </h3>
-          {trend && (
-            <div
-              className={`flex items-center gap-1 mt-2 text-sm ${
-                trend > 0 ? "text-green-600" : "text-red-600"
-              }`}
-            >
-              {trend > 0 ? <FaArrowUp /> : <FaArrowDown />}
-              <span>{Math.abs(trend)}% from last month</span>
-            </div>
-          )}
-        </div>
-        <div
-          className="p-4 rounded-full"
-          style={{ backgroundColor: `${color}20` }}
-        >
-          <Icon className="text-3xl" style={{ color }} />
-        </div>
-      </div>
-    </Link>
-  );
-
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
 
   return (
     <div className="min-h-screen bg-base-200 p-4 md:p-8">
@@ -138,7 +143,6 @@ const DashboardHome = () => {
           />
         </div>
 
-        {/* Quick Actions & Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Quick Actions */}
           <div className="bg-white rounded-xl shadow-md p-6">

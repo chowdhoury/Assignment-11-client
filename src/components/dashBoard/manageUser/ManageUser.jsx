@@ -27,21 +27,18 @@ const ManageUser = () => {
     };
 
     fetchUsers();
-  }, [refetch, user]);
+  }, [refetch, user, setLoading]);
 
   const handleRoleChange = async (userId, newRole) => {
     // Implement role change logic here
-    const result = await fetch(
-      `${import.meta.env.VITE_server_url}/users/${userId}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${user?.accessToken}`,
-        },
-        body: JSON.stringify({ role: newRole }),
-      }
-    );
+    await fetch(`${import.meta.env.VITE_server_url}/users/${userId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: `Bearer ${user?.accessToken}`,
+      },
+      body: JSON.stringify({ role: newRole }),
+    });
     toast.success("Role updated successfully");
 
     setRefetch(!refetch);
