@@ -1,6 +1,4 @@
-import React, { useEffect, useState } from "react";
-import useAuth from "../../../hooks/useAuth";
-import useAxios from "../../../hooks/useAxios";
+import React from "react";
 import {
   FaBook,
   FaShoppingCart,
@@ -16,51 +14,37 @@ import {
 import { Link } from "react-router";
 
 const DashboardHome = () => {
-  const { user } = useAuth();
-  const axios = useAxios();
-  const [stats, setStats] = useState({
-    totalBooks: 0,
-    totalOrders: 0,
-    totalWishlist: 0,
-    totalRevenue: 0,
-  });
-  const [recentOrders, setRecentOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // Mock data for UI display
+  const stats = {
+    totalBooks: 24,
+    totalOrders: 45,
+    totalWishlist: 12,
+    totalRevenue: 1250.75,
+  };
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        // Fetch dashboard statistics and recent orders
-        // You can adjust these endpoints based on your API
-        const [ordersRes, booksRes, wishlistRes] = await Promise.all([
-          axios.get("/orders/my-orders"),
-          axios.get("/books/my-books"),
-          axios.get("/wishlist"),
-        ]);
-
-        setStats({
-          totalBooks: booksRes.data?.length || 0,
-          totalOrders: ordersRes.data?.length || 0,
-          totalWishlist: wishlistRes.data?.length || 0,
-          totalRevenue:
-            ordersRes.data?.reduce(
-              (sum, order) => sum + (order.totalAmount || 0),
-              0
-            ) || 0,
-        });
-
-        // Get last 5 orders
-        setRecentOrders(ordersRes.data?.slice(0, 5) || []);
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, [axios]);
+  const recentOrders = [
+    {
+      _id: "order123456",
+      createdAt: "2024-12-10T10:30:00",
+      items: [{ title: "Book 1" }, { title: "Book 2" }],
+      totalAmount: 45.99,
+      status: "completed",
+    },
+    {
+      _id: "order234567",
+      createdAt: "2024-12-12T14:20:00",
+      items: [{ title: "Book 3" }],
+      totalAmount: 29.99,
+      status: "pending",
+    },
+    {
+      _id: "order345678",
+      createdAt: "2024-12-13T09:15:00",
+      items: [{ title: "Book 4" }, { title: "Book 5" }, { title: "Book 6" }],
+      totalAmount: 89.97,
+      status: "processing",
+    },
+  ];
 
   const StatCard = ({ icon: Icon, title, value, trend, color, link }) => (
     <Link
@@ -105,21 +89,13 @@ const DashboardHome = () => {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-base-200">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-base-200 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-            Welcome back, {user?.displayName || "User"}! 👋
+            Welcome back, User! 👋
           </h1>
           <p className="text-gray-600">
             Here's what's happening with your bookstore today.
@@ -172,25 +148,25 @@ const DashboardHome = () => {
             </h2>
             <div className="space-y-3">
               <Link
-                to="/dashboard/add-book"
+                // to="/dashboard/add-book"
                 className="btn btn-primary btn-block justify-start"
               >
                 <FaBook /> Add New Book
               </Link>
               <Link
-                to="/dashboard/my-orders"
+                // to="/dashboard/my-orders"
                 className="btn btn-outline btn-primary btn-block justify-start"
               >
                 <FaShoppingCart /> View Orders
               </Link>
               <Link
-                to="/dashboard/wishlist"
+                // to="/dashboard/wishlist"
                 className="btn btn-outline btn-secondary btn-block justify-start"
               >
                 <FaHeart /> My Wishlist
               </Link>
               <Link
-                to="/dashboard/user-profile"
+                // to="/dashboard/profile"
                 className="btn btn-outline btn-accent btn-block justify-start"
               >
                 <FaUser /> Edit Profile
@@ -304,7 +280,7 @@ const DashboardHome = () => {
               </div>
             </div>
             <div className="mt-6">
-              <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-lg p-4 text-center">
+              <div className="bg-linear-to-r from-primary/10 to-secondary/10 rounded-lg p-4 text-center">
                 <p className="text-sm text-gray-600 mb-1">
                   Your business is growing!
                 </p>
@@ -316,7 +292,7 @@ const DashboardHome = () => {
           </div>
 
           {/* Tips & Recommendations */}
-          <div className="bg-gradient-to-br from-primary/5 to-secondary/5 rounded-xl shadow-md p-6 border border-primary/10">
+          <div className="bg-linear-to-br from-primary/5 to-secondary/5 rounded-xl shadow-md p-6 border border-primary/10">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
               💡 Tips & Recommendations
             </h2>

@@ -17,6 +17,14 @@ import ManageUser from "../components/dashBoard/manageUser/ManageUser";
 import ManageBooks from "../components/dashBoard/manageBooks/ManageBooks";
 import UserProfile from "../components/dashBoard/userProfile/UserProfile";
 import DashboardHome from "../components/dashBoard/dasboardHome/DashboardHome";
+import PaymentSuccess from "../components/dashBoard/myOrders/PaymentSuccess";
+import PaymentFailed from "../components/dashBoard/myOrders/PaymentFailed";
+import PrivateRoute from "./PrivateRoute";
+import UserRoute from "./UserRoute";
+import LibrariansRoute from "./LibrariansRoute";
+import AdminRoute from "./AdminRoute";
+import NotFound from "../page/NotFound/NotFound";
+import EditBook from "../components/dashBoard/editBook/EditBook";
 
 export const router = createBrowserRouter([
   {
@@ -42,21 +50,26 @@ export const router = createBrowserRouter([
       {
         path: "/books",
         element: <Books />,
-        loader: () =>
-          fetch(`${import.meta.env.VITE_server_url}/books`),
+        loader: () => fetch(`${import.meta.env.VITE_server_url}/books`),
       },
       {
         path: "/books/:bookId",
         element: <BookDetails />,
-        loader: ({ params }) =>
-          fetch(`${import.meta.env.VITE_server_url}/books/${params.bookId}`),
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },
 
   {
     path: "/dashboard",
-    element: <DashboardLayout />,
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
     children: [
       {
         path: "/dashboard",
@@ -64,39 +77,87 @@ export const router = createBrowserRouter([
       },
       {
         path: "my-orders",
-        element: <MyOrders />,
+        element: (
+          <UserRoute>
+            <MyOrders />
+          </UserRoute>
+        ),
       },
       {
         path: "invoices",
-        element: <Invoices />,
+        element: (
+          <UserRoute>
+            <Invoices />
+          </UserRoute>
+        ),
       },
       {
         path: "wishlist",
-        element: <Wishlist />,
+        element: (
+          <UserRoute>
+            <Wishlist />
+          </UserRoute>
+        ),
       },
       {
         path: "add-book",
-        element: <AddProducts />,
+        element: (
+          <LibrariansRoute>
+            <AddProducts />
+          </LibrariansRoute>
+        ),
       },
       {
         path: "my-books",
-        element: <MyBooks />,
+        element: (
+          <LibrariansRoute>
+            <MyBooks />
+          </LibrariansRoute>
+        ),
+      },
+      {
+        path: ":bookId/edit-book",
+        element: (
+          <LibrariansRoute>
+            <EditBook />
+          </LibrariansRoute>
+        ),
       },
       {
         path: "orders",
-        element: <Orders />,
+        element: (
+          <LibrariansRoute>
+            <Orders />
+          </LibrariansRoute>
+        ),
       },
       {
         path: "manage-users",
-        element: <ManageUser />,
+        element: (
+          <AdminRoute>
+            <ManageUser />
+          </AdminRoute>
+        ),
       },
       {
         path: "manage-books",
-        element: <ManageBooks />,
+        element: (
+          <AdminRoute>
+            <ManageBooks />
+          </AdminRoute>
+        ),
       },
       {
         path: "profile",
         element: <UserProfile />,
+      },
+      {
+        path: "payment-success",
+        element: <PaymentSuccess />,
+      },
+      {
+        path: "payment-failed",
+        element: <PaymentFailed />,
       },
     ],
   },

@@ -12,7 +12,7 @@ const WhyUs = () => {
             <figure className="text-white text-5xl bg-primary p-5 rounded-lg mr-4">
               <TbTruckDelivery />
             </figure>
-            <div className="border-r border-primary/30 w-full py-2">
+            <div className="lg:border-r border-primary/30 w-full py-2">
               <h2 className="text-[22px] font-bold text-secondary">
                 Return and refund
               </h2>
@@ -25,7 +25,7 @@ const WhyUs = () => {
             <figure className="text-white text-5xl bg-primary p-5 rounded-lg mr-4">
               <RiSecurePaymentFill />
             </figure>
-            <div className="border-r border-primary/30 w-full py-2">
+            <div className="lg:border-r border-primary/30 w-full py-2">
               <h2 className="text-[22px] font-bold text-secondary">
                 Secure Payment
               </h2>
@@ -38,7 +38,7 @@ const WhyUs = () => {
             <figure className="text-white text-5xl bg-primary p-5 rounded-lg mr-4">
               <MdOutlineSupportAgent />
             </figure>
-            <div className="border-r border-primary/30 w-full py-2">
+            <div className="lg:border-r border-primary/30 w-full py-2">
               <h2 className="text-[22px] font-bold text-secondary">
                 Quality Support
               </h2>

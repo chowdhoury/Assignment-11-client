@@ -1,59 +1,150 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import useAuth from "../../../hooks/useAuth";
+import Swal from "sweetalert2";
+import { auth } from "../../../firebase/Firebase.config";
 
 const MyOrders = () => {
   // Sample orders data - replace with actual data from API
-  const orders = [
-    {
-      id: 1,
-      date: "2023-10-01",
-      title: "The Great Gatsby",
-      amount: 15.99,
-      status: "Shipped",
-      payment: "Paid",
-    },
-    {
-      id: 2,
-      date: "2023-09-28",
-      title: "To Kill a Mockingbird",
-      amount: 12.99,
-      status: "Processing",
-      payment: "Pending",
-    },
-    {
-      id: 3,
-      date: "2023-09-25",
-      title: "1984",
-      amount: 14.5,
-      status: "Delivered",
-      payment: "Paid",
-    },
-    {
-      id: 4,
-      date: "2023-09-20",
-      title: "Pride and Prejudice",
-      amount: 13.99,
-      status: "Cancelled",
-      payment: "Refunded",
-    },
-  ];
+  const { user } = useAuth();
+  const [orders, setOrders] = useState([]);
+  const [refetch, setRefetch] = useState(false);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        const res = await fetch(
+          `${import.meta.env.VITE_server_url}/orders?email=${user?.email}`,
+          {
+            credentials: "include",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const data = await res.json();
+        setOrders(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+        setOrders([]);
+      }
+    };
+
+    if (user) {
+      fetchOrders();
+    }
+  }, [refetch, user?.email]);
 
   const getStatusBadge = (status) => {
     const statusStyles = {
-      Shipped: "badge badge-info text-white",
-      Processing: "badge badge-warning text-white",
-      Delivered: "badge badge-success text-white",
-      Cancelled: "badge badge-error text-white",
+      pending: "badge badge-primary text-white",
+      shipped: "badge badge-info text-white",
+      processing: "badge badge-warning text-white",
+      delivered: "badge badge-success text-white",
+      cancelled: "badge badge-error text-white",
     };
     return statusStyles[status] || "badge badge-ghost";
   };
 
   const getPaymentBadge = (payment) => {
     const paymentStyles = {
-      Paid: "badge badge-success text-white",
-      Pending: "badge badge-warning text-white",
-      Refunded: "badge badge-error text-white",
+      paid: "badge badge-success text-white",
+      unpaid: "badge badge-warning text-white",
+      refunded: "badge badge-error text-white",
     };
     return paymentStyles[payment] || "badge badge-ghost";
+  };
+
+  const handleOrderCancel = async (orderId) => {
+    console.log("Cancel order:", orderId);
+    Swal.fire({
+      title: "Do you want to cancel this order?",
+      // text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Confirm",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const token = await auth.currentUser?.getIdToken();
+        fetch(`${import.meta.env.VITE_server_url}/orders/${orderId}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ status: "cancelled" }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            console.log("Order cancelled:", data);
+            setRefetch(!refetch);
+            Swal.fire({
+              title: "Cancelled!",
+              text: "Your order has been cancelled.",
+              icon: "error",
+            });
+          })
+          .catch((error) => {
+            console.error("Error cancelling order:", error);
+            Swal.fire(
+              "Error!",
+              "There was an issue cancelling your order.",
+              "error"
+            );
+          });
+      }
+    });
+  };
+
+  const handlePayNow = async (order) => {
+    Swal.fire({
+      title: "Want to pay now?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, proceed!",
+      cancelButtonText: "Later",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const token = await auth.currentUser?.getIdToken();
+        fetch(`${import.meta.env.VITE_server_url}/create-checkout-session`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(order),
+        })
+          .then((res) => res.json())
+          .then(
+            (data) => {
+              window.location.href = data.url;
+              // console.log("Payment intent created:", data);
+              // Redirect to payment gateway with the client secret
+              // For example, using Stripe.js
+              // const stripe = Stripe('your-publishable-key-here');
+              // stripe.redirectToCheckout({ sessionId: data.sessionId });
+            }
+            // Swal.fire({
+            //   title: "Deleted!",
+            //   text: "Your file has been deleted.",
+            //   icon: "success",
+            // });
+          )
+          .catch((error) => {
+            console.error("Error creating payment intent:", error);
+            Swal.fire(
+              "Error!",
+              "There was an issue processing your payment.",
+              "error"
+            );
+          });
+      }
+    });
+    console.log("Redirecting to payment gateway for order:", order);
   };
 
   return (
@@ -66,26 +157,26 @@ const MyOrders = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-4 text-white shadow-lg">
+        <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-lg p-4 text-white shadow-lg">
           <div className="text-sm opacity-90">Total Orders</div>
           <div className="text-3xl font-bold">{orders.length}</div>
         </div>
-        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-4 text-white shadow-lg">
+        <div className="bg-linear-to-br from-green-500 to-green-600 rounded-lg p-4 text-white shadow-lg">
           <div className="text-sm opacity-90">Delivered</div>
           <div className="text-3xl font-bold">
-            {orders.filter((o) => o.status === "Delivered").length}
+            {orders.filter((o) => o.status === "delivered").length}
           </div>
         </div>
-        <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg p-4 text-white shadow-lg">
+        <div className="bg-linear-to-br from-yellow-500 to-yellow-600 rounded-lg p-4 text-white shadow-lg">
           <div className="text-sm opacity-90">Processing</div>
           <div className="text-3xl font-bold">
-            {orders.filter((o) => o.status === "Processing").length}
+            {orders.filter((o) => o.status === "processing").length}
           </div>
         </div>
-        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-4 text-white shadow-lg">
-          <div className="text-sm opacity-90">Total Spent</div>
+        <div className="bg-linear-to-br from-red-500 to-red-600 rounded-lg p-4 text-white shadow-lg">
+          <div className="text-sm opacity-90">Payment Pending</div>
           <div className="text-3xl font-bold">
-            ${orders.reduce((sum, o) => sum + o.amount, 0).toFixed(2)}
+            {orders.filter((o) => o.paymentStatus === "unpaid").length}
           </div>
         </div>
       </div>
@@ -109,44 +200,66 @@ const MyOrders = () => {
             <tbody>
               {orders.map((order) => (
                 <tr
-                  key={order.id}
+                  key={order._id}
                   className="hover:bg-gray-50 transition-colors"
                 >
-                  <th className="font-medium text-gray-700">#{order.id}</th>
+                  <th className="font-medium text-gray-700">
+                    #{order.orderId}
+                  </th>
                   <td className="text-gray-600">
-                    {new Date(order.date).toLocaleDateString("en-US", {
+                    {new Date(order.createdAt).toLocaleDateString("en-US", {
                       year: "numeric",
                       month: "short",
                       day: "numeric",
                     })}
                   </td>
-                  <td className="font-medium text-gray-800">{order.title}</td>
+                  <td className="font-medium text-gray-800">
+                    {order.bookTitle}
+                  </td>
                   <td className="text-gray-700 font-semibold">
-                    ${order.amount.toFixed(2)}
+                    ${order.price}
                   </td>
                   <td>
                     <span className={getStatusBadge(order.status)}>
-                      {order.status}
+                      {order.status.charAt(0).toUpperCase() +
+                        order.status.slice(1)}
                     </span>
                   </td>
                   <td>
-                    <span className={getPaymentBadge(order.payment)}>
-                      {order.payment}
+                    <span className={getPaymentBadge(order.paymentStatus)}>
+                      {order.paymentStatus?.charAt(0)?.toUpperCase() +
+                        order.paymentStatus?.slice(1)}
                     </span>
                   </td>
                   <td>
                     <div className="flex gap-2">
-                      {order.payment === "Pending" && (
-                        <button className="btn btn-sm bg-green-500 hover:bg-green-600 text-white border-none">
-                          Pay Now
-                        </button>
-                      )}
-                      {order.status !== "Cancelled" &&
-                        order.status !== "Delivered" && (
-                          <button className="btn btn-sm bg-red-500 hover:bg-red-600 text-white border-none">
-                            Cancel
+                      {order.paymentStatus === "unpaid" &&
+                        order.status !== "cancelled" && (
+                          <button
+                            className="btn btn-sm bg-green-500 hover:bg-green-600 text-white border-none"
+                            onClick={() => handlePayNow(order)}
+                          >
+                            Pay Now
                           </button>
                         )}
+
+                      <button
+                        className={`btn btn-sm text-white border-none
+    ${
+      order.status === "cancelled" || order.paymentStatus === "paid"
+        ? "bg-gray-400 cursor-not-allowed"
+        : "bg-red-500 hover:bg-red-600"
+    }
+  `}
+                        disabled={
+                          order.status === "cancelled" ||
+                          order.paymentStatus === "paid"
+                        }
+                        onClick={() => handleOrderCancel(order._id)}
+                      >
+                        Cancel
+                      </button>
+
                       <button className="btn btn-sm bg-blue-500 hover:bg-blue-600 text-white border-none">
                         View
                       </button>

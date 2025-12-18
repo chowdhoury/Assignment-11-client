@@ -42,9 +42,9 @@ const HeroSlider = () => {
             >
               Books
             </Link>
-            <Link to="/request" className="border-2 border-white text-white hover:bg-primary  px-7 py-3.5 hover:border-primary rounded-lg font-semibold transition-all duration-300">
+            {/* <Link to="/request" className="border-2 border-white text-white hover:bg-primary  px-7 py-3.5 hover:border-primary rounded-lg font-semibold transition-all duration-300">
               Request
-            </Link>
+            </Link> */}
           </div>
         </div>
       </div>

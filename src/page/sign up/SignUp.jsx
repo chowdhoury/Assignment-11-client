@@ -20,8 +20,8 @@ const SignUp = () => {
   const { createUser, updateUserProfile, signInWithGoogle, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state || "/";
-  if(user){
+  const from = location.state?.from?.pathname || "/";
+  if (user) {
     // navigate(from, { replace: true });
   }
   const onSubmit = async (data) => {
@@ -46,8 +46,12 @@ const SignUp = () => {
       .then(async (result) => {
         const loggedUser = result.user;
         await createUserInDB({
-        user: { name: loggedUser.displayName, email: loggedUser.email, photoURL: loggedUser.photoURL },
-      });
+          user: {
+            name: loggedUser.displayName,
+            email: loggedUser.email,
+            photoURL: loggedUser.photoURL,
+          },
+        });
         toast.success("Sign In Successful");
         navigate(from, { replace: true });
       })
@@ -67,7 +71,7 @@ const SignUp = () => {
         <form className="max-w-[400px]" onSubmit={handleSubmit(onSubmit)}>
           <fieldset className="fieldset">
             <label className="label text-secondary">
-              Name <span style={{color:"red"}}>*</span>
+              Name <span style={{ color: "red" }}>*</span>
             </label>
             <input
               type="text"
@@ -84,7 +88,9 @@ const SignUp = () => {
             {errors.name && (
               <p className="text-red-600">{errors.name.message}</p>
             )}
-            <label className="label text-secondary">Email <span style={{color:"red"}}>*</span></label>
+            <label className="label text-secondary">
+              Email <span style={{ color: "red" }}>*</span>
+            </label>
             <input
               type="email"
               className="input w-full text-primary"
@@ -100,7 +106,9 @@ const SignUp = () => {
             {errors.email && (
               <p className="text-red-600">{errors.email.message}</p>
             )}
-            <label className="label text-secondary">Password <span style={{color:"red"}}>*</span></label>
+            <label className="label text-secondary">
+              Password <span style={{ color: "red" }}>*</span>
+            </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -160,6 +168,7 @@ const SignUp = () => {
           Already have an Account?{" "}
           <Link
             to={"/signin"}
+            state={{ from: location.state?.from }}
             className="text-secondary hover:text-primary ml-2 font-semibold underline"
           >
             Sign In

@@ -4,10 +4,16 @@ import { Link, NavLink } from "react-router";
 import Logo from "./Logo";
 import useAuth from "../../hooks/useAuth";
 import { CgProfile } from "react-icons/cg";
+import toast from "react-hot-toast";
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user, logOut } = useAuth();
   // console.log(user);
+
+  const handleLogout = () => {
+    logOut();
+    toast.success("Logged out successfully");
+  }
   const navLinks = (
     <>
       <li>
@@ -51,7 +57,7 @@ const Navbar = () => {
             </div>
             <ul
               tabIndex="-1"
-              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2  shadow"
+              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2  shadow z-50"
             >
               {navLinks}
             </ul>
@@ -64,18 +70,28 @@ const Navbar = () => {
           </ul>
         </div>
         <div className="navbar-end">
-          <figure>
-            {user?.photoURL ? (
-              <img
-              referrerPolicy="no-referrer"
-                src={user.photoURL}
-                alt="User Profile"
-                className="w-10 h-10 rounded-full object-cover"
-              />
-            ) : (
-              <CgProfile className="w-10 h-10 rounded-full text-primary" />
-            )}
-          </figure>
+          {user && (<div className="dropdown dropdown-end">
+            <div
+              tabIndex={0}
+              role="button"
+              className="avatar btn btn-circle btn-ghost btn-sm"
+            >
+              <div className="w-8 rounded-full ring-2 ring-blue-500 ring-offset-2">
+                <img
+                  alt="User avatar"
+                  src={user?.photoURL}
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            </div>
+            <ul tabIndex={0} className="menu dropdown-content z-50 mt-3 w-52 rounded-box bg-base-200 p-2 shadow-lg">
+                    <li><a>Profile</a></li>
+                    {/* <li><a>Settings</a></li> */}
+                    <li
+                    onClick={handleLogout}
+                      ><a>Logout</a></li>
+                  </ul>
+          </div>)}
 
           {!user && (
             <div>

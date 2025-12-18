@@ -8,11 +8,15 @@ import {
   FaSave,
   FaTimes,
 } from "react-icons/fa";
+import { imageUpload } from "../../../utils/UploadImage";
 
 const UserProfile = () => {
   const { user, updateUserProfile, setUser } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [formData, setFormData] = useState({
     displayName: user?.displayName || "",
     photoURL: user?.photoURL || "",
@@ -26,18 +30,50 @@ const UserProfile = () => {
     }));
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await updateUserProfile(formData.displayName, formData.photoURL);
+      let photoURL = formData.photoURL;
+
+      // If a new image file is selected, upload it first
+      if (imageFile) {
+        setUploadingImage(true);
+        try {
+          photoURL = await imageUpload(imageFile);
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          alert("Failed to upload image. Please try again.");
+          setLoading(false);
+          setUploadingImage(false);
+          return;
+        }
+        setUploadingImage(false);
+      }
+
+      await updateUserProfile(formData.displayName, photoURL);
       // Update the user state
       setUser({
         ...user,
         displayName: formData.displayName,
-        photoURL: formData.photoURL,
+        photoURL: photoURL,
       });
       setIsEditing(false);
+      setImageFile(null);
+      setImagePreview(null);
     } catch (error) {
       console.error("Error updating profile:", error);
       alert("Failed to update profile. Please try again.");
@@ -51,6 +87,8 @@ const UserProfile = () => {
       displayName: user?.displayName || "",
       photoURL: user?.photoURL || "",
     });
+    setImageFile(null);
+    setImagePreview(null);
     setIsEditing(false);
   };
 
@@ -79,9 +117,9 @@ const UserProfile = () => {
               <div className="flex flex-col md:flex-row md:items-end gap-4 md:gap-6">
                 <div className="relative">
                   <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-xl overflow-hidden bg-base-200">
-                    {user?.photoURL ? (
+                    {imagePreview || user?.photoURL ? (
                       <img
-                        src={user.photoURL}
+                        src={imagePreview || user.photoURL}
                         alt={user.displayName}
                         className="w-full h-full object-cover"
                       />
@@ -92,9 +130,19 @@ const UserProfile = () => {
                     )}
                   </div>
                   {isEditing && (
-                    <div className="absolute bottom-2 right-2 bg-primary text-white p-2 rounded-full shadow-lg">
+                    <label
+                      htmlFor="photo-upload"
+                      className="absolute bottom-2 right-2 bg-primary text-white p-2 rounded-full shadow-lg cursor-pointer hover:bg-primary-focus"
+                    >
                       <FaCamera />
-                    </div>
+                      <input
+                        id="photo-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="hidden"
+                      />
+                    </label>
                   )}
                 </div>
 
@@ -176,17 +224,6 @@ const UserProfile = () => {
                       : "Unknown"}
                   </p>
                 </div>
-
-                {user?.photoURL && (
-                  <div className="bg-base-200 p-6 rounded-xl md:col-span-2">
-                    <h3 className="text-sm font-semibold text-secondary-content mb-2">
-                      PROFILE PHOTO URL
-                    </h3>
-                    <p className="text-sm font-medium text-secondary-focus break-all">
-                      {user.photoURL}
-                    </p>
-                  </div>
-                )}
               </div>
             ) : (
               // Edit Form
@@ -212,20 +249,33 @@ const UserProfile = () => {
                   <div className="form-control md:col-span-2">
                     <label className="label">
                       <span className="label-text font-semibold">
-                        Profile Photo URL
+                        Profile Photo
                       </span>
                     </label>
-                    <input
-                      type="url"
-                      name="photoURL"
-                      value={formData.photoURL}
-                      onChange={handleInputChange}
-                      placeholder="Enter photo URL"
-                      className="input input-bordered w-full"
-                    />
+                    <div className="flex items-center gap-4">
+                      <label
+                        htmlFor="photo-upload-form"
+                        className="btn btn-outline btn-sm"
+                      >
+                        <FaCamera className="mr-2" />
+                        Choose Photo
+                        <input
+                          id="photo-upload-form"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="hidden"
+                        />
+                      </label>
+                      {imageFile && (
+                        <span className="text-sm text-secondary-content">
+                          {imageFile.name}
+                        </span>
+                      )}
+                    </div>
                     <label className="label">
                       <span className="label-text-alt text-secondary-content">
-                        Paste a URL to your profile picture
+                        Upload a new profile picture (JPG, PNG, or GIF)
                       </span>
                     </label>
                   </div>
@@ -254,11 +304,14 @@ const UserProfile = () => {
                 <div className="flex flex-col sm:flex-row gap-3 pt-4">
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={loading || uploadingImage}
                     className="btn btn-primary flex-1"
                   >
-                    {loading ? (
-                      <span className="loading loading-spinner"></span>
+                    {loading || uploadingImage ? (
+                      <>
+                        <span className="loading loading-spinner"></span>
+                        {uploadingImage ? "Uploading Image..." : "Saving..."}
+                      </>
                     ) : (
                       <>
                         <FaSave className="mr-2" />
@@ -269,7 +322,7 @@ const UserProfile = () => {
                   <button
                     type="button"
                     onClick={handleCancel}
-                    disabled={loading}
+                    disabled={loading || uploadingImage}
                     className="btn btn-outline flex-1"
                   >
                     <FaTimes className="mr-2" />

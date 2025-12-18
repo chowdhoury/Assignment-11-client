@@ -1,25 +1,33 @@
 import { useState, useEffect } from "react";
+import useAuth from "../../../hooks/useAuth";
+import toast from "react-hot-toast";
 
 const ManageUser = () => {
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [refetch, setRefetch] = useState(false);
+  const { loading, setLoading } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_server_url}/users`);
+        const res = await fetch(`${import.meta.env.VITE_server_url}/users`, {
+          headers: {
+            authorization: `Bearer ${user?.accessToken}`,
+          },
+        });
         const data = await res.json();
-        setUsers(data);
+        setUsers(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Error fetching users:", error);
+        setUsers([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchUsers();
-  }, [refetch]);
+  }, [refetch, user]);
 
   const handleRoleChange = async (userId, newRole) => {
     // Implement role change logic here
@@ -29,10 +37,13 @@ const ManageUser = () => {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          authorization: `Bearer ${user?.accessToken}`,
         },
         body: JSON.stringify({ role: newRole }),
       }
     );
+    toast.success("Role updated successfully");
+
     setRefetch(!refetch);
     // console.log(`Change role for user ${userId} to ${newRole}`);
   };
@@ -111,6 +122,7 @@ const ManageUser = () => {
                                 user.photoURL ||
                                 "https://via.placeholder.com/150"
                               }
+                              referrerPolicy="no-referrer"
                               alt={user.name || "User"}
                             />
                           </div>
@@ -125,7 +137,7 @@ const ManageUser = () => {
 
                     <td>
                       <select
-                        className={`select select-sm select-bordered font-semibold transition-all ${
+                        className={`select w-30 select-bordered font-semibold transition-all ${
                           user.role === "admin"
                             ? "bg-red-50 border-red-300 text-red-700 hover:bg-red-100"
                             : user.role === "librarian"

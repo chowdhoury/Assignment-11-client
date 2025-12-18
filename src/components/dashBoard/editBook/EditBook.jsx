@@ -1,15 +1,48 @@
 import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 import useAuth from "../../../hooks/useAuth";
 import { imageUpload } from "../../../utils/UploadImage";
 import toast from "react-hot-toast";
+import { useEffect } from "react";
+import { useParams } from "react-router";
 
-const AddProducts = () => {
+const EditBook = () => {
   const { user } = useAuth();
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { bookId } = useParams();
+  //   const [bookData, setBookData] = useState(null);
+  //   console.log("Editing book with ID:", bookId);
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+    setValue,
+  } = useForm();
 
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_server_url}/allbooks/${bookId}`, {
+      headers: {
+        authorization: `bearer ${user?.accessToken}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setValue("bookTitle", data.bookTitle);
+        setValue("author", data.author);
+        setValue("price", data.price);
+        setValue("visibility", data.visibility);
+        setValue("description", data.description);
+        setValue("bookCover", data.bookCover);
+        setImagePreview(data.bookCover);
+        // console.log("Fetched book data:", data);
+      })
+      .catch((error) => {
+        console.error("Error fetching book data:", error);
+      });
+  }, [bookId, user, setValue]);
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -21,66 +54,53 @@ const AddProducts = () => {
     }
   };
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm();
-
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
-      const bookCoverFile = data.bookCover[0];
-      const bookCoverFileURL = await imageUpload(bookCoverFile);
-      data.bookCover = bookCoverFileURL;
-      data.createdAt = new Date();
-      data.seller = {
-        name: user?.displayName,
-        email: user?.email,
+
+      let bookCoverUrl = imagePreview; // keep existing image
+
+      const file = data.bookCover?.[0];
+
+      // ✅ THIS is the critical fix
+      if (file instanceof File) {
+        bookCoverUrl = await imageUpload(file);
+      }
+
+      const payload = {
+        bookTitle: data.bookTitle,
+        author: data.author,
+        price: parseFloat(data.price),
+        visibility: data.visibility,
+        description: data.description,
+        bookCover: bookCoverUrl,
+        updatedAt: new Date(),
       };
-      data.price = parseFloat(data.price);
-      await mutateAsync(data);
+
+      const response = await fetch(
+        `${import.meta.env.VITE_server_url}/allbooks/${bookId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `bearer ${user?.accessToken}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+
+      if (!response.ok) throw new Error("Update failed");
+
+      toast.success("Book updated successfully");
     } catch (error) {
-      toast.error("Failed to add book");
-      console.error("Error:", error);
+      console.error(error);
+      toast.error("Failed to update book");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const { mutateAsync } = useMutation({
-    mutationFn: async (newBook) => {
-      const response = await fetch(`${import.meta.env.VITE_server_url}/books`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${user?.accessToken}`,
-        },
-        credentials: "include",
-        body: JSON.stringify(newBook),
-      });
 
-      if (!response.ok) {
-        throw new Error("Failed to add book");
-      }
-
-      return await response.json();
-    },
-    onSuccess: (data) => {
-      toast.success("Book added successfully");
-      // console.log("Book added successfully", data);
-      reset();
-      setImagePreview(null);
-    },
-    onError: (error) => {
-      console.error("Error adding book", error);
-    },
-    onMutate: (variables) => {
-      console.log("Adding book...", variables);
-    },
-    retry: 2,
-  });
 
   return (
     <div className="w-full min-h-screen bg-linear-to-br from-base-200 via-white to-base-200 py-8 px-4 sm:px-6 lg:px-8">
@@ -303,7 +323,7 @@ const AddProducts = () => {
                       accept="image/jpeg,image/png,image/webp"
                       className="hidden"
                       {...register("bookCover", {
-                        required: "Book cover image is required",
+                        // required: "Book cover image is required",
                         onChange: handleImageChange,
                       })}
                     />
@@ -350,7 +370,7 @@ const AddProducts = () => {
           {/* Action Buttons */}
           <div className="mt-8 bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div className="flex flex-col sm:flex-row gap-4 justify-end items-center">
-              <button
+              {/* <button
                 onClick={() => {
                   reset();
                   setImagePreview(null);
@@ -372,7 +392,7 @@ const AddProducts = () => {
                   />
                 </svg>
                 Reset Form
-              </button>
+              </button> */}
 
               <button
                 disabled={isSubmitting}
@@ -394,7 +414,7 @@ const AddProducts = () => {
                         d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                       />
                     </svg>
-                    Adding...
+                    Updating
                   </>
                 ) : (
                   <>
@@ -411,7 +431,7 @@ const AddProducts = () => {
                         d="M12 4v16m8-8H4"
                       />
                     </svg>
-                    Add Book
+                    Update
                   </>
                 )}
               </button>
@@ -423,4 +443,4 @@ const AddProducts = () => {
   );
 };
 
-export default AddProducts;
+export default EditBook;

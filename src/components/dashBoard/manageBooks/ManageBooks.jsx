@@ -2,31 +2,41 @@ import React, { useState, useEffect } from "react";
 import useAxios from "../../../hooks/useAxios";
 import useAuth from "../../../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
+import Swal from "sweetalert2";
 
 const ManageBooks = () => {
   const [books, setBooks] = useState([]);
   const [refetch, setRefetch] = useState(false);
+  const { user } = useAuth();
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_server_url}/allbooks`);
+        const res = await fetch(`${import.meta.env.VITE_server_url}/allbooks`, {
+          headers: {
+            authorization: `Bearer ${user?.accessToken}`,
+          },
+        });
         const data = await res.json();
-        setBooks(data);
+        setBooks(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error("Error fetching books:", error);
+        setBooks([]);
       }
     };
 
-    fetchBooks();
-  }, [refetch]);
+    if (user?.accessToken) {
+      fetchBooks();
+    }
+  }, [refetch, user?.accessToken]);
 
   const handleVisibilityChange = async (bookId, newStatus) => {
     const result = await fetch(
-      `${import.meta.env.VITE_server_url}/books/${bookId}`,
+      `${import.meta.env.VITE_server_url}/allbooks/${bookId}`,
       {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
+          authorization: `Bearer ${user?.accessToken}`,
         },
         body: JSON.stringify({ visibility: newStatus }),
       }
@@ -34,6 +44,37 @@ const ManageBooks = () => {
     setRefetch(!refetch);
     // You might want to refetch the books or update the state here
     console.log(`Change status for book ${bookId} to ${newStatus}`);
+  };
+
+  const handleDelete = async (bookId) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const response = await fetch(
+          `${import.meta.env.VITE_server_url}/books/${bookId}`,
+          {
+            method: "DELETE",
+            headers: {
+              authorization: `Bearer ${user?.accessToken}`,
+            },
+          }
+        );
+        setRefetch(!refetch);
+        Swal.fire({
+          title: "Deleted!",
+          text: "Your file has been deleted.",
+          icon: "success",
+        });
+      }
+    });
+    console.log(`Delete book with ID: ${bookId}`);
   };
 
   return (
@@ -132,7 +173,7 @@ const ManageBooks = () => {
                     </td>
                     <td>
                       <select
-                        className={`select select-sm font-medium border-2 transition-all duration-200 ${
+                        className={`select w-40 font-medium border-2 transition-all duration-200 ${
                           book.visibility === "public"
                             ? "bg-green-50 border-green-300 text-green-700 hover:bg-green-100 focus:border-green-500"
                             : "bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100 focus:border-orange-500"
@@ -165,7 +206,7 @@ const ManageBooks = () => {
                     <td>
                       <div className="flex gap-2">
                         <button
-                          // onClick={() => handleDelete(book._id)}
+                          onClick={() => handleDelete(book._id)}
                           // disabled={deleteLoading === book._id}
                           className="btn btn-sm bg-red-500 hover:bg-red-600 text-white border-none"
                           title="Delete Book"

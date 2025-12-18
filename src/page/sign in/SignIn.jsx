@@ -19,10 +19,8 @@ const SignIn = () => {
   } = useForm();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state || "/";
-  if(user){
-    navigate(from, { replace: true });
-  }
+  const from = location.state?.from?.pathname || "/";
+  // navigate(from, { replace: true });
 
   const onSubmit = (data) => {
     const { email, password } = data;
@@ -36,19 +34,23 @@ const SignIn = () => {
       });
   };
   const handleGoogleSignIn = () => {
-      signInWithGoogle()
-        .then(async (result) => {
-          const loggedUser = result.user;
-          await createUserInDB({
-          user: { name: loggedUser.displayName, email: loggedUser.email, photoURL: loggedUser.photoURL },
+    signInWithGoogle()
+      .then(async (result) => {
+        const loggedUser = result.user;
+        await createUserInDB({
+          user: {
+            name: loggedUser.displayName,
+            email: loggedUser.email,
+            photoURL: loggedUser.photoURL,
+          },
         });
-          toast.success("Sign In Successful");
-          navigate(from, { replace: true });
-        })
-        .catch((err) => {
-          toast.error(err.message);
-        });
-    };
+        toast.success("Sign In Successful");
+        navigate(from, { replace: true });
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      });
+  };
 
   return (
     <div className="min-h-screen w-full bg-base-200/30 flex justify-center items-center -mb-40">
@@ -64,7 +66,9 @@ const SignIn = () => {
           className="max-w-[400px] min-w-[350px]"
         >
           <fieldset className="fieldset">
-            <label className="label text-secondary">Email <span style={{color:"red"}}>*</span></label>
+            <label className="label text-secondary">
+              Email <span style={{ color: "red" }}>*</span>
+            </label>
             <input
               type="email"
               className="input w-full text-primary"
@@ -80,7 +84,9 @@ const SignIn = () => {
             {errors.email && (
               <p className="text-red-600">{errors.email.message}</p>
             )}
-            <label className="label text-secondary">Password <span style={{color:"red"}}>*</span></label>
+            <label className="label text-secondary">
+              Password <span style={{ color: "red" }}>*</span>
+            </label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -127,7 +133,8 @@ const SignIn = () => {
         <p className="flex items-start text-secondary-content font-semibold">
           Don't have an Account?{" "}
           <Link
-            to={"/signup"}
+            to="/signup"
+            state={{ from: location.state?.from }}
             className="text-secondary hover:text-primary ml-2 font-semibold underline"
           >
             Sign Up

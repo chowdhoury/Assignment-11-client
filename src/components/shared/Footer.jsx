@@ -86,7 +86,7 @@ const Footer = () => {
             Community
           </a>
         </div>
-        <div className="flex-1 flex flex-col gap-5">
+        <div className="flex-1 flex flex-col sm:items-center sm:justify-center lg:justify-start lg:items-start gap-5">
           <h2 className="text-secondary font-bold text-xl">Contact</h2>
           <span className="flex items-start gap-2 ">
             <FaMapMarker />

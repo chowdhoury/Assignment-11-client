@@ -2,18 +2,47 @@ import React, { useEffect, useState } from "react";
 import { FaRegHeart } from "react-icons/fa";
 import { MdOutlineShoppingCart } from "react-icons/md";
 import BookCard from "../../books/bookCard";
+import { auth } from "../../../firebase/Firebase.config";
+import useAuth from "../../../hooks/useAuth";
 
 const Wishlist = () => {
   const [wishlistItems, setWishlistItems] = useState([]);
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_server_url}/wishlist`, {
-      credentials: "include",
-    })
-      .then((response) => response.json())
-      .then((data) => setWishlistItems(data))
-      .catch((error) => console.error("Error fetching wishlist:", error));
-  }, []);
+  const { user } = useAuth();
 
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        const response = await fetch(
+          `${import.meta.env.VITE_server_url}/wishlist?userEmail=${
+            user?.email
+          }`,
+          {
+            credentials: "include",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          console.error("Failed to fetch wishlist:", response.status);
+          setWishlistItems([]);
+          return;
+        }
+
+        const data = await response.json();
+        setWishlistItems(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Error fetching wishlist:", error);
+        setWishlistItems([]);
+      }
+    };
+    if (user?.email && auth.currentUser) {
+      fetchWishlist();
+    }
+  }, [user?.email]);
+  // console.log(wishlistItems);
   return (
     <div className="min-h-screen bg-base-100 py-8 px-4 md:px-6 lg:px-8">
       {/* Header Section */}
@@ -40,9 +69,12 @@ const Wishlist = () => {
       {/* Wishlist Items Grid */}
       {wishlistItems.length > 0 ? (
         <div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-            {wishlistItems.map((item) => (
-              <BookCard key={item.id} book={item} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {wishlistItems.map((book) => (
+              <BookCard
+                key={book.bookId}
+                book={{ ...book, _id: book.bookId }}
+              />
             ))}
           </div>
 

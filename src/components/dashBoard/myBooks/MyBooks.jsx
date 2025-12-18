@@ -2,64 +2,51 @@ import React, { useState, useEffect } from "react";
 import useAxios from "../../../hooks/useAxios";
 import useAuth from "../../../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
+import { use } from "react";
+import { Link } from "react-router";
 
 const MyBooks = () => {
   const [books, setBooks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [deleteLoading, setDeleteLoading] = useState(null);
-
-  const axios = useAxios();
   const { user } = useAuth();
-  const { data } = useQuery({
-    queryKey: ["books", user?.email],
-    queryFn: async () => {
-      const books = await axios.get(`/books?email=${user?.email}`);
-      return books.data;
-    },
-  });
-  console.log(data);
-
+  const [refetch, setRefetch] = useState(false);
   useEffect(() => {
-    const booksData = data || [];
-    setBooks(booksData);
-    setLoading(false);
-  }, [data]);
-  
-  const handleDelete = async (bookId) => {
-    if (window.confirm("Are you sure you want to delete this book?")) {
-      setDeleteLoading(bookId);
+    const fetchBooks = async () => {
       try {
-        setBooks(books.filter((book) => book._id !== bookId));
-        alert("Book deleted successfully!");
+        const res = await fetch(
+          `${import.meta.env.VITE_server_url}/allbooks?email=${user.email}`,
+          {
+            headers: {
+              authorization: `Bearer ${user?.accessToken}`,
+            },
+          }
+        );
+        const data = await res.json();
+        setBooks(Array.isArray(data) ? data : []);
       } catch (error) {
-        console.error("Error deleting book:", error);
-        alert("Failed to delete book. Please try again.");
-      } finally {
-        setDeleteLoading(null);
+        console.error("Error fetching books:", error);
+        setBooks([]);
       }
-    }
-  };
+    };
 
-  const handleEdit = (bookId) => {
-    console.log("Edit book:", bookId);
-    alert(`Edit functionality for book ${bookId} - Coming soon!`);
-  };
+    fetchBooks();
+  }, [refetch, user]);
 
-  const getStockStatus = (stock) => {
-    if (stock === 0)
-      return { text: "Out of Stock", class: "text-red-600 font-semibold" };
-    if (stock < 10)
-      return { text: "Low Stock", class: "text-orange-600 font-semibold" };
-    return { text: "In Stock", class: "text-green-600 font-semibold" };
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="loading loading-spinner loading-lg text-primary"></div>
-      </div>
+  const handleVisibilityChange = async (bookId, newStatus) => {
+    const result = await fetch(
+      `${import.meta.env.VITE_server_url}/allbooks/${bookId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${user?.accessToken}`,
+        },
+        body: JSON.stringify({ visibility: newStatus }),
+      }
     );
-  }
+    setRefetch(!refetch);
+    // You might want to refetch the books or update the state here
+    console.log(`Change status for book ${bookId} to ${newStatus}`);
+  };
 
   return (
     <div className="p-6 bg-base-100 min-h-screen">
@@ -113,14 +100,15 @@ const MyBooks = () => {
                 {/* <th className="text-gray-700 font-semibold">Category</th> */}
                 <th className="text-gray-700 font-semibold">Price</th>
                 <th className="text-gray-700 font-semibold">Status</th>
-                {/* <th className="text-gray-700 font-semibold">Rating</th>
-                <th className="text-gray-700 font-semibold">Year</th> */}
+                {/* <th className="text-gray-700 font-semibold">Seller</th> */}
+                {/* <th className="text-gray-700 font-semibold">Seller Email</th> */}
+                {/* <th className="text-gray-700 font-semibold">Year</th> */}
                 <th className="text-gray-700 font-semibold">Actions</th>
               </tr>
             </thead>
             <tbody>
               {books.map((book) => {
-                const stockStatus = getStockStatus(book.stock);
+                // const stockStatus = getStockStatus(book.stock);
                 return (
                   <tr
                     key={book._id}
@@ -155,21 +143,42 @@ const MyBooks = () => {
                       ${book?.price}
                     </td>
                     <td>
-                      <div className="flex flex-col">
-                        <span className="text-gray-700 font-medium">
-                          {book.stock}
-                        </span>
-                        <span className={`text-xs ${stockStatus.class}`}>
-                          {book.visibility === "private"
-                            ? "Unpublished"
-                            : "Published"}
-                        </span>
-                      </div>
+                      <select
+                        className={`select w-40 font-medium border-2 transition-all duration-200 ${
+                          book.visibility === "public"
+                            ? "bg-green-50 border-green-300 text-green-700 hover:bg-green-100 focus:border-green-500"
+                            : "bg-orange-50 border-orange-300 text-orange-700 hover:bg-orange-100 focus:border-orange-500"
+                        }`}
+                        value={book.visibility}
+                        onChange={(event) =>
+                          handleVisibilityChange(book._id, event.target.value)
+                        }
+                      >
+                        <option
+                          value="public"
+                          className="bg-white text-green-700"
+                        >
+                          ✓ Published
+                        </option>
+                        <option
+                          value="private"
+                          className="bg-white text-orange-700"
+                        >
+                          ⊘ Unpublished
+                        </option>
+                      </select>
                     </td>
+                    {/* <td className="text-gray-700 font-semibold">
+                      {book?.seller?.name}
+                    </td>
+                    <td className="text-gray-700 font-semibold">
+                      {book?.seller?.email}
+                    </td> */}
                     <td>
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(book._id)}
+                        <Link
+                          to={`/dashboard/${book._id}/edit-book`}
+                          // onClick={() => handleEdit(book._id)}
                           className="btn btn-sm bg-blue-500 hover:bg-blue-600 text-white border-none"
                           title="Edit Book"
                         >
@@ -186,31 +195,7 @@ const MyBooks = () => {
                               d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                             />
                           </svg>
-                        </button>
-                        {/* <button
-                          onClick={() => handleDelete(book._id)}
-                          disabled={deleteLoading === book._id}
-                          className="btn btn-sm bg-red-500 hover:bg-red-600 text-white border-none"
-                          title="Delete Book"
-                        >
-                          {deleteLoading === book._id ? (
-                            <span className="loading loading-spinner loading-xs"></span>
-                          ) : (
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                          )}
-                        </button> */}
+                        </Link>
                       </div>
                     </td>
                   </tr>
@@ -243,7 +228,7 @@ const MyBooks = () => {
               Start by adding your first book to the inventory.
             </p>
             <div className="mt-6">
-              <button className="btn btn-primary">
+              <Link to="/dashboard/add-book" className="btn btn-primary">
                 <svg
                   className="w-5 h-5 mr-2"
                   fill="none"
@@ -258,7 +243,7 @@ const MyBooks = () => {
                   />
                 </svg>
                 Add New Book
-              </button>
+              </Link>
             </div>
           </div>
         )}
